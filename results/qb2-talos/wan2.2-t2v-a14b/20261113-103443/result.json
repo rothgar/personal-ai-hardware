@@ -1,0 +1,94 @@
+{
+  "machine": "qb2-talos",
+  "model": "wan2.2-t2v-a14b",
+  "hf_id": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
+  "api": "tt",
+  "kind": "video",
+  "server": "ghcr.io/tenstorrent/tt-media-inference-server:0.17.0-8c48a10, 4x Blackhole",
+  "workload": {
+    "size": "832x480",
+    "frames": 81,
+    "fps": 16,
+    "steps": 40,
+    "guidance": [
+      4.0,
+      3.0
+    ],
+    "concurrency": 1,
+    "prompts": 4,
+    "warmup": 1
+  },
+  "date": "2026-11-13T11:19:25-0800",
+  "summary": {
+    "videos": 4,
+    "wall_s": 2191.4781274300767,
+    "videos_per_hour": 6.570907470971078,
+    "latency_mean_s": 547.8688854637439,
+    "latency_min_s": 528.9426177339628,
+    "latency_max_s": 558.8541082220618,
+    "server_time_mean_s": null
+  },
+  "requests": [
+    {
+      "prompt_idx": 0,
+      "seed": 42,
+      "latency_s": 528.9426177339628,
+      "bytes": 2388227,
+      "job": {
+        "id": "662f54d4-a53c-48a1-96b9-cf5cc3ce450c",
+        "job_type": "video",
+        "status": "completed",
+        "created_at": 1794595373,
+        "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
+        "completed_at": 1794595901
+      },
+      "video": "videos/p00.mp4"
+    },
+    {
+      "prompt_idx": 1,
+      "seed": 42,
+      "latency_s": 548.8355593859451,
+      "bytes": 2583466,
+      "job": {
+        "id": "ef83f45a-bc08-4245-9278-1fc3842ad985",
+        "job_type": "video",
+        "status": "completed",
+        "created_at": 1794595902,
+        "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
+        "completed_at": 1794596450
+      },
+      "video": "videos/p01.mp4"
+    },
+    {
+      "prompt_idx": 2,
+      "seed": 42,
+      "latency_s": 554.843256513006,
+      "bytes": 2359362,
+      "job": {
+        "id": "92a0ef64-2420-4858-aa83-c12b3192b4b9",
+        "job_type": "video",
+        "status": "completed",
+        "created_at": 1794596451,
+        "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
+        "completed_at": 1794597005
+      },
+      "video": "videos/p02.mp4"
+    },
+    {
+      "prompt_idx": 3,
+      "seed": 42,
+      "latency_s": 558.8541082220618,
+      "bytes": 2263948,
+      "job": {
+        "id": "a9ea7ae1-386b-4fb7-94d9-5375565b415d",
+        "job_type": "video",
+        "status": "completed",
+        "created_at": 1794597006,
+        "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
+        "completed_at": 1794597563
+      },
+      "video": "videos/p03.mp4"
+    }
+  ],
+  "videos_note": "clips re-encoded (H.264 CRF 30) for the repo; the servers produced larger files"
+}

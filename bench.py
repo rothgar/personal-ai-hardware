@@ -653,7 +653,7 @@ def cmd_report(cfg: dict, a: argparse.Namespace) -> int:
 
 # ---------------------------------------------------------------------------------------------------- site
 
-SITE_RESULTS, SITE_QUALITY, SITE_TALOS, SITE_IMAGES = "results.csv", "quality.csv", "talos.csv", "images.csv"
+SITE_RESULTS, SITE_QUALITY, SITE_TALOS, SITE_IMAGES, SITE_VIDEOS = "results.csv", "quality.csv", "talos.csv", "images.csv", "videos.csv"
 
 
 def cmd_site(cfg: dict, a: argparse.Namespace) -> int:
@@ -711,16 +711,44 @@ def cmd_site(cfg: dict, a: argparse.Namespace) -> int:
     print(f"wrote {DOCS / 'talos.html'} ({len(pairs)} paired tests)")
 
     runs, reqs = image_results(cfg)
+    vruns = video_results(cfg)
     if runs:
-        with open(DOCS / SITE_IMAGES, "w", newline="") as fh:
-            w = csv.DictWriter(fh, list(runs[0]))
-            w.writeheader()
-            w.writerows(runs)
-        write_page("images.html", (ROOT / "site" / "images.html").read_text(), {"runs": runs, "requests": reqs},
-                   "Image generation", "FLUX.1-schnell text-to-image speed on a Tenstorrent QuietBox 2 and an NVIDIA "
-                   "DGX Spark: seconds per image and images per minute at 1024x1024.")
-        print(f"wrote {DOCS / 'images.html'} ({len(runs)} runs, {len(reqs)} images)")
+        for name, rows in ((SITE_IMAGES, runs), (SITE_VIDEOS, vruns)):
+            if rows:
+                with open(DOCS / name, "w", newline="") as fh:
+                    w = csv.DictWriter(fh, list(rows[0]))
+                    w.writeheader()
+                    w.writerows(rows)
+        write_page("images.html", (ROOT / "site" / "images.html").read_text(),
+                   {"runs": runs, "requests": reqs, "videos": vruns}, "Image and video generation",
+                   "FLUX.1-schnell images and Wan2.2 video on a Tenstorrent QuietBox 2, one NVIDIA DGX Spark and two "
+                   "Sparks: seconds per image or clip, on the same prompts and settings.")
+        print(f"wrote {DOCS / 'images.html'} ({len(runs)} image runs, {len(reqs)} images, {len(vruns)} video runs)")
     return 0
+
+
+def video_results(cfg: dict) -> list[dict]:
+    """The newest text-to-video run (tools/video_bench.py) per machine, model and workload, one row per clip."""
+    newest: dict[tuple, dict] = {}
+    for f in sorted(RESULTS.glob("*/*/*/result.json")):
+        j = json.loads(f.read_text())
+        if j.get("kind") != "video":
+            continue
+        wl = j["workload"]
+        newest[(j["machine"], j["model"], wl["size"], wl["frames"], wl["steps"])] = {**j, "run": f.parts[-2]}
+    rows = []
+    for j in newest.values():
+        mc, s, wl = cfg["machines"].get(j["machine"], {}), j["summary"], j["workload"]
+        for r in j["requests"]:
+            rows.append({
+                "system": mc.get("label", j["machine"]), "family": mc.get("family", ""), "machine": j["machine"],
+                "model": j["model"], "hf_id": j["hf_id"], "server": j["server"], "size": wl["size"],
+                "frames": wl["frames"], "fps": wl["fps"], "steps": wl["steps"], "prompt": r["prompt_idx"],
+                "latency_s": round(r["latency_s"], 1), "clips_per_hour": round(s["videos_per_hour"], 2),
+                "latency_mean_s": round(s["latency_mean_s"], 1), "run": j["run"],
+            })
+    rows.sort(key=lambda r: (r["model"], r["latency_mean_s"], r["prompt"]))
+    return rows
 
 
 def image_results(cfg: dict) -> tuple[list[dict], list[dict]]:
@@ -729,7 +757,7 @@ def image_results(cfg: dict) -> tuple[list[dict], list[dict]]:
     newest: dict[tuple, dict] = {}
     for f in sorted(RESULTS.glob("*/*/*/result.json")):
         j = json.loads(f.read_text())
-        if "api" not in j:
+        if "api" not in j or j.get("kind") == "video":
             continue
         wl = j["workload"]
         newest[(j["machine"], j["model"], wl["size"], wl["steps"])] = {**j, "run": f.parts[-2]}

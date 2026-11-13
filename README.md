@@ -54,6 +54,12 @@ tools/image_bench.py --api tt --url http://<server>:8000 --machine qb2-talos --m
   --out results/qb2-talos/flux.1-schnell/$(date +%Y%m%d-%H%M%S)
 ```
 
+`tools/video_bench.py` does the same for text-to-video (Tenstorrent's media server job API and vLLM-Omni's
+`/v1/videos`): four fixed prompts, one clip at a time after one uncounted warm-up, timed from submitting the job to
+downloading the MP4. The published run is Wan2.2-T2V-A14B at 832×480, 81 frames, 40 steps, guidance 4.0 / 3.0 (the
+shape Tenstorrent's p300x2 build serves) on the QuietBox 2, one DGX Spark, and both Sparks as one vLLM-Omni server
+(Ray over the QSFP cable, `--cfg-parallel-size 2`).
+
 | machine | serves models with | client |
 |---|---|---|
 | Tenstorrent QuietBox 2 (2× p300c, 4 Blackhole chips) | `tt serve` (Tenstorrent catalog builds and tt-model bundles) | `vllm bench serve` |
@@ -94,6 +100,7 @@ sampled, and `meta.json` with the software and hardware versions. Server logs st
 | `machines.example.yaml` | template for `machines.yaml`: ssh targets and power plugs |
 | `tools/loadgen.py` | the benchmark client for machines without vLLM |
 | `tools/image_bench.py` | the text-to-image benchmark client |
+| `tools/video_bench.py` | the text-to-video benchmark client |
 | `tools/powerlog.py` | optional continuous plug logger |
 | `site/` | the page source; `./bench.py site` builds it into `docs/` |
 | `docs/` | the published pages and their data (`results.csv`, `quality.csv`, `talos.csv`, `images.csv`) |

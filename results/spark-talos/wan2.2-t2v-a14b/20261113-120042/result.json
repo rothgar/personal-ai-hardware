@@ -1,0 +1,178 @@
+{
+  "machine": "spark-talos",
+  "model": "wan2.2-t2v-a14b",
+  "hf_id": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
+  "api": "omni",
+  "kind": "video",
+  "server": "vllm/vllm-omni:v0.32.0-aarch64, 1 GPU",
+  "workload": {
+    "size": "832x480",
+    "frames": 81,
+    "fps": 16,
+    "steps": 40,
+    "guidance": [
+      4.0,
+      3.0
+    ],
+    "concurrency": 1,
+    "prompts": 4,
+    "warmup": 1
+  },
+  "date": "2026-11-13T14:25:35-0800",
+  "summary": {
+    "videos": 4,
+    "wall_s": 6961.841895187041,
+    "videos_per_hour": 2.068418130833338,
+    "latency_mean_s": 1740.4594730896933,
+    "latency_min_s": 1732.6920051719062,
+    "latency_max_s": 1750.4468872379512,
+    "server_time_mean_s": 1737.4683898449998
+  },
+  "requests": [
+    {
+      "prompt_idx": 0,
+      "seed": 42,
+      "latency_s": 1734.2532445630059,
+      "bytes": 3413026,
+      "server_time_s": 1731.3114647749999,
+      "job": {
+        "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
+        "id": "video_gen_a66257bd593f445482e1871ce54ca99e",
+        "object": "video",
+        "status": "completed",
+        "size": "832x480",
+        "progress": 100,
+        "seconds": "4",
+        "quality": "default",
+        "completed_at": 1794603505,
+        "created_at": 1794601773,
+        "remixed_from_video_id": null,
+        "error": null,
+        "media_type": "video/mp4",
+        "expires_at": null,
+        "file_name": "video_gen_a66257bd593f445482e1871ce54ca99e.mp4",
+        "inference_time_s": 1731.3114647749999,
+        "fps": 16.0,
+        "num_frames": 81,
+        "duration_s": 5.0625,
+        "metrics": null,
+        "stage_durations": {
+          "queue_wait_ms": 0.831975999972201,
+          "stage_0_gen_ms": 1731016.02435112
+        },
+        "peak_memory_mb": 73692.0,
+        "action": null
+      },
+      "video": "videos/p00.mp4"
+    },
+    {
+      "prompt_idx": 1,
+      "seed": 42,
+      "latency_s": 1732.6920051719062,
+      "bytes": 2017303,
+      "server_time_s": 1730.062020637,
+      "job": {
+        "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
+        "id": "video_gen_dc0b7f14d7e64a88b2fc75c1d6383d29",
+        "object": "video",
+        "status": "completed",
+        "size": "832x480",
+        "progress": 100,
+        "seconds": "4",
+        "quality": "default",
+        "completed_at": 1794605238,
+        "created_at": 1794603508,
+        "remixed_from_video_id": null,
+        "error": null,
+        "media_type": "video/mp4",
+        "expires_at": null,
+        "file_name": "video_gen_dc0b7f14d7e64a88b2fc75c1d6383d29.mp4",
+        "inference_time_s": 1730.062020637,
+        "fps": 16.0,
+        "num_frames": 81,
+        "duration_s": 5.0625,
+        "metrics": null,
+        "stage_durations": {
+          "queue_wait_ms": 0.3723600002558669,
+          "stage_0_gen_ms": 1729741.7845726013
+        },
+        "peak_memory_mb": 73262.0,
+        "action": null
+      },
+      "video": "videos/p01.mp4"
+    },
+    {
+      "prompt_idx": 2,
+      "seed": 42,
+      "latency_s": 1750.4468872379512,
+      "bytes": 3830679,
+      "server_time_s": 1747.6226155369995,
+      "job": {
+        "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
+        "id": "video_gen_e104bcf0283f4b558f6305f5ce7f7d60",
+        "object": "video",
+        "status": "completed",
+        "size": "832x480",
+        "progress": 100,
+        "seconds": "4",
+        "quality": "default",
+        "completed_at": 1794606988,
+        "created_at": 1794605240,
+        "remixed_from_video_id": null,
+        "error": null,
+        "media_type": "video/mp4",
+        "expires_at": null,
+        "file_name": "video_gen_e104bcf0283f4b558f6305f5ce7f7d60.mp4",
+        "inference_time_s": 1747.6226155369995,
+        "fps": 16.0,
+        "num_frames": 81,
+        "duration_s": 5.0625,
+        "metrics": null,
+        "stage_durations": {
+          "queue_wait_ms": 0.8746980001888005,
+          "stage_0_gen_ms": 1747298.5215187073
+        },
+        "peak_memory_mb": 73242.0,
+        "action": null
+      },
+      "video": "videos/p02.mp4"
+    },
+    {
+      "prompt_idx": 3,
+      "seed": 42,
+      "latency_s": 1744.4457553859102,
+      "bytes": 3867804,
+      "server_time_s": 1740.8774584310004,
+      "job": {
+        "model": "Wan-AI/Wan2.2-T2V-A14B-Diffusers",
+        "id": "video_gen_de48b669e3364ad698cb72cc7e856833",
+        "object": "video",
+        "status": "completed",
+        "size": "832x480",
+        "progress": 100,
+        "seconds": "4",
+        "quality": "default",
+        "completed_at": 1794608732,
+        "created_at": 1794606991,
+        "remixed_from_video_id": null,
+        "error": null,
+        "media_type": "video/mp4",
+        "expires_at": null,
+        "file_name": "video_gen_de48b669e3364ad698cb72cc7e856833.mp4",
+        "inference_time_s": 1740.8774584310004,
+        "fps": 16.0,
+        "num_frames": 81,
+        "duration_s": 5.0625,
+        "metrics": null,
+        "stage_durations": {
+          "queue_wait_ms": 0.33686699953250354,
+          "stage_0_gen_ms": 1740608.999490738
+        },
+        "peak_memory_mb": 73974.0,
+        "action": null
+      },
+      "video": "videos/p03.mp4"
+    }
+  ],
+  "videos_note": "clips re-encoded (H.264 CRF 30) for the repo; the servers produced larger files"
+}

@@ -1,0 +1,13 @@
+system,family,machine,model,hf_id,server,size,frames,fps,steps,prompt,latency_s,clips_per_hour,latency_mean_s,run
+QuietBox 2,Tenstorrent,qb2-talos,wan2.2-t2v-a14b,Wan-AI/Wan2.2-T2V-A14B-Diffusers,"ghcr.io/tenstorrent/tt-media-inference-server:0.17.0-8c48a10, 4x Blackhole",832x480,81,16,40,0,528.9,6.57,547.9,20261113-103443
+QuietBox 2,Tenstorrent,qb2-talos,wan2.2-t2v-a14b,Wan-AI/Wan2.2-T2V-A14B-Diffusers,"ghcr.io/tenstorrent/tt-media-inference-server:0.17.0-8c48a10, 4x Blackhole",832x480,81,16,40,1,548.8,6.57,547.9,20261113-103443
+QuietBox 2,Tenstorrent,qb2-talos,wan2.2-t2v-a14b,Wan-AI/Wan2.2-T2V-A14B-Diffusers,"ghcr.io/tenstorrent/tt-media-inference-server:0.17.0-8c48a10, 4x Blackhole",832x480,81,16,40,2,554.8,6.57,547.9,20261113-103443
+QuietBox 2,Tenstorrent,qb2-talos,wan2.2-t2v-a14b,Wan-AI/Wan2.2-T2V-A14B-Diffusers,"ghcr.io/tenstorrent/tt-media-inference-server:0.17.0-8c48a10, 4x Blackhole",832x480,81,16,40,3,558.9,6.57,547.9,20261113-103443
+2x DGX Spark,NVIDIA,spark-pair-talos,wan2.2-t2v-a14b,Wan-AI/Wan2.2-T2V-A14B-Diffusers,"vllm/vllm-omni:v0.32.0-aarch64, 2 GPUs over QSFP (Ray), cfg-parallel 2",832x480,81,16,40,0,871.9,4.12,874.3,20261113-142920
+2x DGX Spark,NVIDIA,spark-pair-talos,wan2.2-t2v-a14b,Wan-AI/Wan2.2-T2V-A14B-Diffusers,"vllm/vllm-omni:v0.32.0-aarch64, 2 GPUs over QSFP (Ray), cfg-parallel 2",832x480,81,16,40,1,876.4,4.12,874.3,20261113-142920
+2x DGX Spark,NVIDIA,spark-pair-talos,wan2.2-t2v-a14b,Wan-AI/Wan2.2-T2V-A14B-Diffusers,"vllm/vllm-omni:v0.32.0-aarch64, 2 GPUs over QSFP (Ray), cfg-parallel 2",832x480,81,16,40,2,874.2,4.12,874.3,20261113-142920
+2x DGX Spark,NVIDIA,spark-pair-talos,wan2.2-t2v-a14b,Wan-AI/Wan2.2-T2V-A14B-Diffusers,"vllm/vllm-omni:v0.32.0-aarch64, 2 GPUs over QSFP (Ray), cfg-parallel 2",832x480,81,16,40,3,874.6,4.12,874.3,20261113-142920
+DGX Spark,NVIDIA,spark-talos,wan2.2-t2v-a14b,Wan-AI/Wan2.2-T2V-A14B-Diffusers,"vllm/vllm-omni:v0.32.0-aarch64, 1 GPU",832x480,81,16,40,0,1734.3,2.07,1740.5,20261113-120042
+DGX Spark,NVIDIA,spark-talos,wan2.2-t2v-a14b,Wan-AI/Wan2.2-T2V-A14B-Diffusers,"vllm/vllm-omni:v0.32.0-aarch64, 1 GPU",832x480,81,16,40,1,1732.7,2.07,1740.5,20261113-120042
+DGX Spark,NVIDIA,spark-talos,wan2.2-t2v-a14b,Wan-AI/Wan2.2-T2V-A14B-Diffusers,"vllm/vllm-omni:v0.32.0-aarch64, 1 GPU",832x480,81,16,40,2,1750.4,2.07,1740.5,20261113-120042
+DGX Spark,NVIDIA,spark-talos,wan2.2-t2v-a14b,Wan-AI/Wan2.2-T2V-A14B-Diffusers,"vllm/vllm-omni:v0.32.0-aarch64, 1 GPU",832x480,81,16,40,3,1744.4,2.07,1740.5,20261113-120042

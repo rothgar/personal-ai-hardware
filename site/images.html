@@ -44,20 +44,29 @@
   .qx-gallery .qx-who { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .qx-gallery figcaption { font-size: var(--cds-font-size-caption); color: var(--color-fg); line-height: 1.4; }
   .qx-note { margin: 0; color: var(--color-fg-muted); max-width: 72ch; line-height: 1.5; }
+  .qx-vgallery { display: flex; flex-direction: column; gap: var(--cds-gap-lg); }
+  .qx-vgallery figure { margin: 0; display: flex; flex-direction: column; gap: var(--cds-gap-xs); }
+  .qx-vgallery .qx-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: var(--cds-gap-sm); }
+  .qx-vgallery .qx-row div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .qx-vgallery video { width: 100%; height: auto; aspect-ratio: 832 / 480; display: block; border-radius: 4px; background: var(--color-border-line); }
+  .qx-vgallery .qx-who { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .qx-vgallery figcaption { font-size: var(--cds-font-size-caption); color: var(--color-fg); }
 </style>
 
 <div class="qx">
   <header class="qx-head">
-    <h1>Image generation</h1>
+    <h1>Image and video generation</h1>
     <p class="qx-lede">
-      FLUX.1-schnell text-to-image on the QuietBox 2 and one DGX Spark, both on Talos Linux and Kubernetes, each with the
-      server its vendor's stack provides. One image at a time at 1024×1024 and 4 steps:
-      <span id="lede">—</span>.
+      Open diffusion models on the QuietBox 2 and the DGX Spark, all on Talos Linux and Kubernetes, each with the server
+      its vendor's stack provides. FLUX.1-schnell images, one at a time at 1024×1024 and 4 steps:
+      <span id="lede">—</span>. <a href="#video">Wan2.2 video</a>, five-second clips at 832×480:
+      <span id="vlede">—</span>.
     </p>
     <p class="qx-links">
       <a href="index.html">← Tokens per Joule</a>
       <a href="talos.html">Talos Linux vs Ubuntu</a>
-      <a href="images.csv">Data (CSV)</a>
+      <a href="images.csv">Image data (CSV)</a>
+      <a href="videos.csv">Video data (CSV)</a>
       <a href="https://github.com/rothgar/qb2-vs-spark">Code and data on GitHub</a>
     </p>
   </header>
@@ -93,6 +102,25 @@
     </div>
   </section>
 
+  <section class="qx-section" id="video">
+    <h2>Video: Wan2.2</h2>
+      <div class="qx-card">
+        <h3>Minutes per clip</h3>
+        <p>Wan2.2-T2V-A14B, 81 frames (about five seconds at 16 fps) at 832×480, 40 steps with guidance, one clip at a
+          time: a dot per clip, the bar is the mean. Lower is better.</p>
+        <div class="qx-chart" id="vid-chart"></div>
+      </div>
+      <div class="qx-card">
+        <h3>Every number</h3>
+        <div class="qx-scroll"><div id="vtable"></div></div>
+      </div>
+    <div class="qx-card">
+      <h3>The clips</h3>
+      <p>The same prompt, seed and settings on each system (the stacks seed their noise differently, so the clips differ).</p>
+      <div class="qx-vgallery" id="vgallery"></div>
+    </div>
+  </section>
+
   <section class="qx-section" id="notes">
     <h2>Reading these results</h2>
     <div class="qx-card">
@@ -109,8 +137,20 @@
           the QuietBox 2 sends; the QuietBox 2's overhead is a few hundredths of a second.</li>
         <li>Requests went through <code>kubectl port-forward</code> from a workstation on the same network for both
           machines, which adds a little to every request on both.</li>
-        <li>Not measured yet: startup time (the QuietBox 2's first boot took about 8 minutes to download the weights,
-          compile and warm up), wall power, larger images, and two Sparks.</li>
+        <li>Not measured yet for images: startup time (the QuietBox 2's first boot took about 8 minutes to download
+          the weights, compile and warm up), wall power, larger images, and two Sparks.</li>
+        <li><b>Video.</b> Wan2.2-T2V-A14B (two 14B experts, Apache-2.0). The QuietBox 2 ran Tenstorrent's build for
+          p300x2 (<code>tt-media-inference-server</code> 0.17.0, marked complete in the catalog), which serves a fixed
+          832×480, 81-frame shape with guidance 4.0 then 3.0; the Sparks were sent the same shape, guidance, step count
+          (40), seed and Wan's standard negative prompt, so every system ran the same amount of guided denoising.</li>
+        <li>The 2x DGX Spark rows run one vLLM-Omni server across both Sparks: a Ray cluster over the QSFP cable, with
+          CFG parallelism putting the positive and negative halves of each guided step on separate GPUs (NCCL over the
+          RoCE rails). That split moves little data per step, and it ran 1.99× as fast as one Spark.</li>
+        <li>Each Spark drew about 200 W at the wall with its GPU at 96% utilization and 80–86 °C for the whole run. One
+          Spark powered itself off 15 minutes into its first clip; after a power cycle it ran the full test, and the
+          pair after it, without a repeat.</li>
+        <li>The QuietBox 2's first Wan2.2 boot took about 30 minutes (a 126 GB download plus compiling); clips are
+          shown re-encoded smaller than the servers produced them.</li>
       </ul>
     </div>
   </section>
@@ -119,15 +159,24 @@
   <p><b>Method.</b> <code>tools/image_bench.py</code> sends 16 fixed prompts twice (seeds 42 and 43) to each server's
   <code>/v1/images/generations</code>, one request at a time, after two warm-up requests that are not counted, and
   times each from request to decoded response. Images per minute is 32 divided by the wall time of the timed requests.</p>
-  <p><b>Data and code:</b> <a href="images.csv">images.csv</a>, per-image times and every image in
-  <code>results/*/flux.1-schnell/</code> at <a href="https://github.com/rothgar/qb2-vs-spark">github.com/rothgar/qb2-vs-spark</a>. Built __DATE__.</p>
+  <p><code>tools/video_bench.py</code> sends four fixed prompts (seed 42) one at a time after one uncounted warm-up
+  clip, and times each from submitting the job to downloading the finished MP4.</p>
+  <p><b>Data and code:</b> <a href="images.csv">images.csv</a>, <a href="videos.csv">videos.csv</a>, and every
+  image and clip in <code>results/*/flux.1-schnell/</code> and <code>results/*/wan2.2-t2v-a14b/</code> at <a href="https://github.com/rothgar/qb2-vs-spark">github.com/rothgar/qb2-vs-spark</a>. Built __DATE__.</p>
 </footer>
 </div>
 
 <script>
   const SYS_COLOR = { 'QuietBox 2': 0, 'DGX Spark': 1, '2x DGX Spark': 2 };   // the main page's colors
   const color = (s) => dash.colors[SYS_COLOR[s] ?? 5];
-  const SLUG = { 'QuietBox 2': 'qb2-talos', 'DGX Spark': 'spark-talos' };
+  const SLUG = { 'QuietBox 2': 'qb2-talos', 'DGX Spark': 'spark-talos', '2x DGX Spark': 'spark-pair-talos' };
+  const VPROMPTS = [
+    'a red fox trotting through a snowy pine forest at dawn, photorealistic',
+    'waves crashing against a lighthouse on a rocky coast during a storm',
+    'an astronaut riding a horse across the surface of mars, cinematic',
+    'a cat stretching and yawning on a sunny windowsill, close-up',
+  ];
+  const VGALLERY = [0, 2];   // the clips copied to docs/vid/
   const PROMPTS = [
     'a red fox in a snowy pine forest at dawn, photorealistic',
     'a lighthouse on a rocky coast during a storm, oil painting',
@@ -287,5 +336,82 @@
       for (const r of runs) { const tr = tb.insertRow(); for (const [, f] of cols) tr.insertCell().textContent = f(r); }
       document.getElementById('table').replaceChildren(t);
     }
+  });
+  // ---- video: one row per clip (videos.csv)
+  const vids = () => rowsOf('videos');
+  const vsystems = () => d3.sort([...new Set(vids().map((r) => r.system))],
+                                 (s) => +vids().find((r) => r.system === s).latency_mean_s);
+  const fmin = (s) => `${d3.format(',.1f')(s / 60)} min`;
+  (() => {
+    const g = document.getElementById('vgallery');
+    for (const i of VGALLERY) {
+      const fig = document.createElement('figure'), row = document.createElement('div');
+      row.className = 'qx-row';
+      for (const s of vsystems()) {
+        const d = document.createElement('div'), v = document.createElement('video'), who = document.createElement('span');
+        v.src = `vid/${SLUG[s] || s}-p${String(i).padStart(2, '0')}.mp4`; v.controls = true; v.loop = true; v.muted = true;
+        v.playsInline = true; v.preload = 'metadata'; v.setAttribute('aria-label', `${s}: ${VPROMPTS[i]}`);
+        who.className = 'qx-who'; who.textContent = s;
+        d.append(v, who); row.appendChild(d);
+      }
+      const cap = document.createElement('figcaption'); cap.textContent = VPROMPTS[i];
+      fig.append(row, cap); g.appendChild(fig);
+    }
+  })();
+
+  dash.onData(() => {
+    const rows = vids(), systems = vsystems();
+    if (!rows.length) return;
+    const by = Object.fromEntries(systems.map((s) => [s, rows.filter((r) => r.system === s)]));
+    const mean = (s) => +by[s][0].latency_mean_s;
+
+    // lede
+    const parts = [];
+    systems.forEach((s, i) => {
+      const b = document.createElement('b'); b.textContent = fmin(mean(s));
+      parts.push(...(i ? ['; '] : []), `the ${s} took `, b, ' a clip');
+    });
+    document.getElementById('vlede').replaceChildren(...parts);
+
+    // minutes per clip: dots per clip, a bar at the mean, value at the right
+    const host = document.getElementById('vid-chart'), W = host.clientWidth || 500;
+    const labelW = Math.min(130, W * 0.3), rowH = 44, H = systems.length * rowH + 24;
+    const x = d3.scaleLinear().domain([0, d3.max(rows, (r) => +r.latency_s) / 60 * 1.08]).nice().range([labelW, W - 64]);
+    host.replaceChildren();
+    const svg = d3.select(host).append('svg').attr('width', W).attr('height', H).attr('role', 'img')
+      .attr('aria-label', 'Minutes per clip: ' + systems.map((s) => `${s} ${fmin(mean(s))}`).join(', '));
+    svg.append('g').selectAll('line').data(x.ticks(6)).join('line')
+      .attr('x1', (t) => x(t)).attr('x2', (t) => x(t)).attr('y1', 0).attr('y2', H - 20)
+      .attr('stroke', (t) => t === 0 ? 'var(--cds-chart-reference)' : 'var(--cds-chart-grid)');
+    svg.append('g').selectAll('text').data(x.ticks(6)).join('text')
+      .attr('x', (t) => x(t)).attr('y', H - 4).attr('text-anchor', 'middle').attr('class', 'qx-small').text((t) => `${t} min`);
+    systems.forEach((s, i) => {
+      const cy = i * rowH + 20, c = color(s), m = mean(s) / 60;
+      svg.append('text').attr('x', labelW - 10).attr('y', cy + 5).attr('text-anchor', 'end').attr('class', 'qx-strong').text(s);
+      svg.append('path').attr('fill', c).attr('fill-opacity', 0.35)
+        .attr('d', `M${x(0)},${cy - 9}h${x(m) - x(0) - 4}a4,4 0 0 1 4,4v10a4,4 0 0 1 -4,4h${-(x(m) - x(0) - 4)}z`);
+      svg.append('g').selectAll('circle').data(by[s]).join('circle')
+        .attr('cx', (r) => x(+r.latency_s / 60)).attr('cy', cy).attr('r', 4.5).attr('fill', c)
+        .attr('stroke', 'var(--color-panel)').attr('stroke-width', 1);
+      svg.append('text').attr('x', W - 58).attr('y', cy + 5).attr('class', 'qx-strong').text(fmin(mean(s)));
+      svg.append('g').selectAll('circle.hit').data(by[s]).join('circle')
+        .attr('cx', (r) => x(+r.latency_s / 60)).attr('cy', cy).attr('r', 9).attr('fill', 'transparent')
+        .on('pointerenter pointermove', (ev, r) => tip.show(host, ev, `${s}: “${VPROMPTS[+r.prompt]}”`,
+          [['Clip', `${f1(+r.latency_s)} s`], ['Mean', `${f1(mean(s))} s`]]))
+        .on('pointerleave', () => tip.hide());
+    });
+
+    // table
+    const fast = mean(systems[0]);
+    const cols = [['System', (s) => s], ['Server', (s) => by[s][0].server.replace(/^.*\//, '')],
+                  ['Per clip', (s) => fmin(mean(s))], ['Clips per hour', (s) => f2(+by[s][0].clips_per_hour)],
+                  [`vs ${systems[0]}`, (s) => s === systems[0] ? '1.00×' : `${f2(mean(s) / fast)}× slower`],
+                  ['Clips', (s) => by[s].length]];
+    const t = document.createElement('table'); t.className = 'qx-table';
+    const hr = t.createTHead().insertRow();
+    for (const [h] of cols) { const th = document.createElement('th'); th.textContent = h; hr.appendChild(th); }
+    const tb = t.createTBody();
+    for (const s of systems) { const tr = tb.insertRow(); for (const [, f] of cols) tr.insertCell().textContent = f(s); }
+    document.getElementById('vtable').replaceChildren(t);
   });
 </script>
