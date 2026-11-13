@@ -1,0 +1,318 @@
+{
+  "machine": "spark-talos",
+  "model": "flux.1-schnell",
+  "hf_id": "black-forest-labs/FLUX.1-schnell",
+  "api": "omni",
+  "server": "vllm/vllm-omni:v0.32.0-aarch64",
+  "workload": {
+    "size": "1024x1024",
+    "steps": 4,
+    "concurrency": 1,
+    "prompts": 16,
+    "rounds": 2,
+    "warmup": 2
+  },
+  "date": "2026-11-12T20:21:57-0800",
+  "summary": {
+    "images": 32,
+    "wall_s": 188.06062695302535,
+    "images_per_min": 10.209473567689352,
+    "latency_mean_s": 5.873237769832485,
+    "latency_p50_s": 5.784697613969911,
+    "latency_p90_s": 6.172926719998941,
+    "latency_min_s": 5.5654772949637845,
+    "latency_max_s": 6.785769733018242,
+    "server_gen_mean_s": 5.126582108438015
+  },
+  "requests": [
+    {
+      "round": 0,
+      "prompt_idx": 0,
+      "seed": 42,
+      "latency_s": 5.6235031029209495,
+      "generation_time_s": 5.063606023788452,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r0-p00.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 1,
+      "seed": 42,
+      "latency_s": 5.661501156981103,
+      "generation_time_s": 5.082419395446777,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r0-p01.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 2,
+      "seed": 42,
+      "latency_s": 5.6595835029147565,
+      "generation_time_s": 5.089481353759766,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r0-p02.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 3,
+      "seed": 42,
+      "latency_s": 5.632642667973414,
+      "generation_time_s": 5.092361688613892,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r0-p03.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 4,
+      "seed": 42,
+      "latency_s": 5.655101733049378,
+      "generation_time_s": 5.102049827575684,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r0-p04.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 5,
+      "seed": 42,
+      "latency_s": 5.654948735958897,
+      "generation_time_s": 5.110438346862793,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r0-p05.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 6,
+      "seed": 42,
+      "latency_s": 5.628540446050465,
+      "generation_time_s": 5.115090608596802,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r0-p06.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 7,
+      "seed": 42,
+      "latency_s": 5.63954054703936,
+      "generation_time_s": 5.1217474937438965,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r0-p07.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 8,
+      "seed": 42,
+      "latency_s": 5.671332094003446,
+      "generation_time_s": 5.120970964431763,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r0-p08.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 9,
+      "seed": 42,
+      "latency_s": 5.5654772949637845,
+      "generation_time_s": 5.122315883636475,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r0-p09.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 10,
+      "seed": 42,
+      "latency_s": 5.656331220990978,
+      "generation_time_s": 5.124334335327148,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r0-p10.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 11,
+      "seed": 42,
+      "latency_s": 5.714324870030396,
+      "generation_time_s": 5.147254705429077,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r0-p11.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 12,
+      "seed": 42,
+      "latency_s": 5.756271897931583,
+      "generation_time_s": 5.129251003265381,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r0-p12.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 13,
+      "seed": 42,
+      "latency_s": 5.947705553029664,
+      "generation_time_s": 5.134430170059204,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r0-p13.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 14,
+      "seed": 42,
+      "latency_s": 6.412713660043664,
+      "generation_time_s": 5.130135536193848,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r0-p14.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 15,
+      "seed": 42,
+      "latency_s": 5.698749143979512,
+      "generation_time_s": 5.128259897232056,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r0-p15.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 0,
+      "seed": 43,
+      "latency_s": 6.125126619939692,
+      "generation_time_s": 5.13073205947876,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r1-p00.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 1,
+      "seed": 43,
+      "latency_s": 6.388151199906133,
+      "generation_time_s": 5.133970737457275,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r1-p01.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 2,
+      "seed": 43,
+      "latency_s": 5.950902377953753,
+      "generation_time_s": 5.129549503326416,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r1-p02.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 3,
+      "seed": 43,
+      "latency_s": 5.932467449107207,
+      "generation_time_s": 5.1320788860321045,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r1-p03.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 4,
+      "seed": 43,
+      "latency_s": 5.842466073925607,
+      "generation_time_s": 5.135612487792969,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r1-p04.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 5,
+      "seed": 43,
+      "latency_s": 6.785769733018242,
+      "generation_time_s": 5.136470317840576,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r1-p05.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 6,
+      "seed": 43,
+      "latency_s": 5.964527464937419,
+      "generation_time_s": 5.155401945114136,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r1-p06.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 7,
+      "seed": 43,
+      "latency_s": 5.8131233300082386,
+      "generation_time_s": 5.134790420532227,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r1-p07.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 8,
+      "seed": 43,
+      "latency_s": 5.748548991046846,
+      "generation_time_s": 5.134417295455933,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r1-p08.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 9,
+      "seed": 43,
+      "latency_s": 5.891801533987746,
+      "generation_time_s": 5.140535593032837,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r1-p09.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 10,
+      "seed": 43,
+      "latency_s": 5.861514537013136,
+      "generation_time_s": 5.1548285484313965,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r1-p10.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 11,
+      "seed": 43,
+      "latency_s": 5.716852161916904,
+      "generation_time_s": 5.137795925140381,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r1-p11.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 12,
+      "seed": 43,
+      "latency_s": 6.172926719998941,
+      "generation_time_s": 5.155839204788208,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r1-p12.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 13,
+      "seed": 43,
+      "latency_s": 6.32188117003534,
+      "generation_time_s": 5.154111862182617,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r1-p13.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 14,
+      "seed": 43,
+      "latency_s": 5.995758668053895,
+      "generation_time_s": 5.134563207626343,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r1-p14.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 15,
+      "seed": 43,
+      "latency_s": 5.853522975929081,
+      "generation_time_s": 5.135782241821289,
+      "peak_memory_mb": 36730.0,
+      "image": "images/r1-p15.jpg"
+    }
+  ],
+  "images_note": "images resized to 512x512 JPEG for the repo; generated at 1024x1024 PNG"
+}

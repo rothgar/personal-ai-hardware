@@ -39,6 +39,21 @@ A model that doesn't have the memory for that on one machine can run on a bigger
 Every run sends its own random prompts (a seed per test and user count), so a server with prefix caching never
 answers a measured request from an earlier run's prompts.
 
+### Image generation
+
+`tools/image_bench.py` times text-to-image servers: 16 fixed prompts, twice (seeds 42 and 43), one request at a time
+after two uncounted warm-up requests, at a fixed size and step count, against `/v1/images/generations`. It speaks
+Tenstorrent's media server (`--api tt`) and [vLLM-Omni](https://github.com/vllm-project/vllm-omni) (`--api omni`) and
+writes `result.json` (per-image times and a summary) and the images. The published run is FLUX.1-schnell at 1024×1024
+and 4 steps on the QuietBox 2 (Tenstorrent's `tt-media-inference-server`, the p300x2 build from tt-inference-server's
+catalog) and one DGX Spark (vLLM-Omni), both on Talos Linux + Kubernetes; `./bench.py site` builds it into
+`docs/images.html`.
+
+```
+tools/image_bench.py --api tt --url http://<server>:8000 --machine qb2-talos --model flux.1-schnell \
+  --out results/qb2-talos/flux.1-schnell/$(date +%Y%m%d-%H%M%S)
+```
+
 | machine | serves models with | client |
 |---|---|---|
 | Tenstorrent QuietBox 2 (2× p300c, 4 Blackhole chips) | `tt serve` (Tenstorrent catalog builds and tt-model bundles) | `vllm bench serve` |
@@ -78,9 +93,10 @@ sampled, and `meta.json` with the software and hardware versions. Server logs st
 | `bench.yaml` | machines (grouped by `family`), models with their build on each machine, and tests |
 | `machines.example.yaml` | template for `machines.yaml`: ssh targets and power plugs |
 | `tools/loadgen.py` | the benchmark client for machines without vLLM |
+| `tools/image_bench.py` | the text-to-image benchmark client |
 | `tools/powerlog.py` | optional continuous plug logger |
 | `site/` | the page source; `./bench.py site` builds it into `docs/` |
-| `docs/` | the published page and its data (`results.csv`, `quality.csv`) |
+| `docs/` | the published pages and their data (`results.csv`, `quality.csv`, `talos.csv`, `images.csv`) |
 | `results/` | every run's results |
 
 ## Adding your machine

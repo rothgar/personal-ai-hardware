@@ -1,0 +1,286 @@
+{
+  "machine": "qb2-talos",
+  "model": "flux.1-schnell",
+  "hf_id": "black-forest-labs/FLUX.1-schnell",
+  "api": "tt",
+  "server": "ghcr.io/tenstorrent/tt-media-inference-server:0.18.0-c49bb76",
+  "workload": {
+    "size": "1024x1024",
+    "steps": 4,
+    "concurrency": 1,
+    "prompts": 16,
+    "rounds": 2,
+    "warmup": 2
+  },
+  "date": "2026-11-12T20:20:27-0800",
+  "summary": {
+    "images": 32,
+    "wall_s": 102.52933182998095,
+    "images_per_min": 18.72634850662868,
+    "latency_mean_s": 3.2021876780636376,
+    "latency_p50_s": 3.2080889655044302,
+    "latency_p90_s": 3.223055250942707,
+    "latency_min_s": 3.135126893990673,
+    "latency_max_s": 3.2410846069687977,
+    "server_gen_mean_s": 3.1803125
+  },
+  "requests": [
+    {
+      "round": 0,
+      "prompt_idx": 0,
+      "seed": 42,
+      "latency_s": 3.1905651909764856,
+      "generation_time_s": 3.17,
+      "image": "images/r0-p00.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 1,
+      "seed": 42,
+      "latency_s": 3.2088659700239077,
+      "generation_time_s": 3.18,
+      "image": "images/r0-p01.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 2,
+      "seed": 42,
+      "latency_s": 3.2073119609849527,
+      "generation_time_s": 3.19,
+      "image": "images/r0-p02.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 3,
+      "seed": 42,
+      "latency_s": 3.2251759179634973,
+      "generation_time_s": 3.21,
+      "image": "images/r0-p03.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 4,
+      "seed": 42,
+      "latency_s": 3.2225490260170773,
+      "generation_time_s": 3.2,
+      "image": "images/r0-p04.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 5,
+      "seed": 42,
+      "latency_s": 3.1806082980474457,
+      "generation_time_s": 3.16,
+      "image": "images/r0-p05.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 6,
+      "seed": 42,
+      "latency_s": 3.174462956027128,
+      "generation_time_s": 3.15,
+      "image": "images/r0-p06.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 7,
+      "seed": 42,
+      "latency_s": 3.2230229530250654,
+      "generation_time_s": 3.2,
+      "image": "images/r0-p07.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 8,
+      "seed": 42,
+      "latency_s": 3.2136747899930924,
+      "generation_time_s": 3.19,
+      "image": "images/r0-p08.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 9,
+      "seed": 42,
+      "latency_s": 3.169034304912202,
+      "generation_time_s": 3.15,
+      "image": "images/r0-p09.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 10,
+      "seed": 42,
+      "latency_s": 3.1961480210302398,
+      "generation_time_s": 3.17,
+      "image": "images/r0-p10.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 11,
+      "seed": 42,
+      "latency_s": 3.1910364240175113,
+      "generation_time_s": 3.17,
+      "image": "images/r0-p11.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 12,
+      "seed": 42,
+      "latency_s": 3.135126893990673,
+      "generation_time_s": 3.12,
+      "image": "images/r0-p12.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 13,
+      "seed": 42,
+      "latency_s": 3.221187678980641,
+      "generation_time_s": 3.19,
+      "image": "images/r0-p13.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 14,
+      "seed": 42,
+      "latency_s": 3.1983860339969397,
+      "generation_time_s": 3.18,
+      "image": "images/r0-p14.jpg"
+    },
+    {
+      "round": 0,
+      "prompt_idx": 15,
+      "seed": 42,
+      "latency_s": 3.2181591369444504,
+      "generation_time_s": 3.19,
+      "image": "images/r0-p15.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 0,
+      "seed": 43,
+      "latency_s": 3.214607425034046,
+      "generation_time_s": 3.2,
+      "image": "images/r1-p00.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 1,
+      "seed": 43,
+      "latency_s": 3.214766515069641,
+      "generation_time_s": 3.19,
+      "image": "images/r1-p01.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 2,
+      "seed": 43,
+      "latency_s": 3.235125008970499,
+      "generation_time_s": 3.21,
+      "image": "images/r1-p02.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 3,
+      "seed": 43,
+      "latency_s": 3.166028970037587,
+      "generation_time_s": 3.15,
+      "image": "images/r1-p03.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 4,
+      "seed": 43,
+      "latency_s": 3.2410846069687977,
+      "generation_time_s": 3.22,
+      "image": "images/r1-p04.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 5,
+      "seed": 43,
+      "latency_s": 3.1867251460207626,
+      "generation_time_s": 3.16,
+      "image": "images/r1-p05.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 6,
+      "seed": 43,
+      "latency_s": 3.1812902980018407,
+      "generation_time_s": 3.16,
+      "image": "images/r1-p06.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 7,
+      "seed": 43,
+      "latency_s": 3.1987363540101796,
+      "generation_time_s": 3.18,
+      "image": "images/r1-p07.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 8,
+      "seed": 43,
+      "latency_s": 3.223055250942707,
+      "generation_time_s": 3.2,
+      "image": "images/r1-p08.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 9,
+      "seed": 43,
+      "latency_s": 3.188046121969819,
+      "generation_time_s": 3.16,
+      "image": "images/r1-p09.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 10,
+      "seed": 43,
+      "latency_s": 3.22121681610588,
+      "generation_time_s": 3.2,
+      "image": "images/r1-p10.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 11,
+      "seed": 43,
+      "latency_s": 3.202162046916783,
+      "generation_time_s": 3.18,
+      "image": "images/r1-p11.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 12,
+      "seed": 43,
+      "latency_s": 3.1669166289502755,
+      "generation_time_s": 3.15,
+      "image": "images/r1-p12.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 13,
+      "seed": 43,
+      "latency_s": 3.231184729025699,
+      "generation_time_s": 3.21,
+      "image": "images/r1-p13.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 14,
+      "seed": 43,
+      "latency_s": 3.212581283063628,
+      "generation_time_s": 3.19,
+      "image": "images/r1-p14.jpg"
+    },
+    {
+      "round": 1,
+      "prompt_idx": 15,
+      "seed": 43,
+      "latency_s": 3.2111629400169477,
+      "generation_time_s": 3.19,
+      "image": "images/r1-p15.jpg"
+    }
+  ],
+  "images_note": "images resized to 512x512 JPEG for the repo; generated at 1024x1024 PNG"
+}

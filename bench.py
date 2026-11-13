@@ -653,7 +653,7 @@ def cmd_report(cfg: dict, a: argparse.Namespace) -> int:
 
 # ---------------------------------------------------------------------------------------------------- site
 
-SITE_RESULTS, SITE_QUALITY, SITE_TALOS = "results.csv", "quality.csv", "talos.csv"
+SITE_RESULTS, SITE_QUALITY, SITE_TALOS, SITE_IMAGES = "results.csv", "quality.csv", "talos.csv", "images.csv"
 
 
 def cmd_site(cfg: dict, a: argparse.Namespace) -> int:
@@ -709,7 +709,48 @@ def cmd_site(cfg: dict, a: argparse.Namespace) -> int:
                "The same QuietBox 2 and DGX Spark on Talos Linux and on Ubuntu: the change in throughput, per-user "
                "speed and time to first token for each model and test.")
     print(f"wrote {DOCS / 'talos.html'} ({len(pairs)} paired tests)")
+
+    runs, reqs = image_results(cfg)
+    if runs:
+        with open(DOCS / SITE_IMAGES, "w", newline="") as fh:
+            w = csv.DictWriter(fh, list(runs[0]))
+            w.writeheader()
+            w.writerows(runs)
+        write_page("images.html", (ROOT / "site" / "images.html").read_text(), {"runs": runs, "requests": reqs},
+                   "Image generation", "FLUX.1-schnell text-to-image speed on a Tenstorrent QuietBox 2 and an NVIDIA "
+                   "DGX Spark: seconds per image and images per minute at 1024x1024.")
+        print(f"wrote {DOCS / 'images.html'} ({len(runs)} runs, {len(reqs)} images)")
     return 0
+
+
+def image_results(cfg: dict) -> tuple[list[dict], list[dict]]:
+    """The newest text-to-image run (tools/image_bench.py: results/<machine>/<model>/<run>/result.json) per machine,
+    model and workload, and its per-image times."""
+    newest: dict[tuple, dict] = {}
+    for f in sorted(RESULTS.glob("*/*/*/result.json")):
+        j = json.loads(f.read_text())
+        if "api" not in j:
+            continue
+        wl = j["workload"]
+        newest[(j["machine"], j["model"], wl["size"], wl["steps"])] = {**j, "run": f.parts[-2]}
+    runs, reqs = [], []
+    for j in newest.values():
+        mc, s, wl = cfg["machines"].get(j["machine"], {}), j["summary"], j["workload"]
+        system = mc.get("label", j["machine"])
+        runs.append({
+            "system": system, "family": mc.get("family", ""), "hardware": mc.get("hardware", ""), "model": j["model"],
+            "hf_id": j["hf_id"], "server": j["server"], "size": wl["size"], "steps": wl["steps"], "images": s["images"],
+            "images_per_min": round(s["images_per_min"], 2), "latency_mean_s": round(s["latency_mean_s"], 3),
+            "latency_p50_s": round(s["latency_p50_s"], 3), "latency_p90_s": round(s["latency_p90_s"], 3),
+            "server_gen_mean_s": round(s["server_gen_mean_s"], 3) if s.get("server_gen_mean_s") else None,
+            "run": j["run"], "machine": j["machine"],
+        })
+        reqs += [{"system": system, "model": j["model"], "round": r["round"], "prompt": r["prompt_idx"],
+                  "latency_s": round(r["latency_s"], 3),
+                  "gen_s": round(r["generation_time_s"], 3) if r.get("generation_time_s") else None}
+                 for r in j["requests"]]
+    runs.sort(key=lambda r: (r["model"], r["system"]))
+    return runs, reqs
 
 
 def talos_pairs(cfg: dict, results: list[dict]) -> list[dict]:

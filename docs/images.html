@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Image generation</title>
+<meta name="description" content="FLUX.1-schnell text-to-image speed on a Tenstorrent QuietBox 2 and an NVIDIA DGX Spark: seconds per image and images per minute at 1024x1024.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+  /* stand-ins for the dashboard runtime's theme tokens */
+  :root {
+    color-scheme: light;
+    --font-anthropic-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-anthropic-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --color-fg: #1c2027; --color-fg-muted: #5a6170; --color-bg: #f5f6f8; --color-panel: #ffffff;
+    --color-border-line: #e1e4ea; --color-ok: #1f7a4d; --color-warn: #9a6200; --color-bad: #c0392b;
+    --cds-text-secondary: #6b7280; --cds-surface-popover: #ffffff; --cds-border: #dfe2e8;
+    --cds-shadow-popover: 0 6px 24px rgba(20, 24, 33, 0.12);
+    --cds-chart-grid: #e8eaef; --cds-chart-axis: #b7bcc6; --cds-chart-reference: #8b92a0; --cds-chart-muted: #b6bcc7;
+    --cds-chart-status-critical: #c0392b;
+    --cds-radius: 10px;
+    --cds-gap-xs: 0.25rem; --cds-gap-sm: 0.5rem; --cds-gap-md: 1rem; --cds-gap-lg: 1.5rem; --cds-gap-xl: 2.5rem;
+    --cds-pad-xs: 0.25rem; --cds-pad-sm: 0.5rem; --cds-pad-md: 0.75rem; --cds-pad-lg: 1.25rem; --cds-pad-xl: 2rem;
+    --cds-font-size-caption: 0.8125rem; --cds-font-size-body: 0.9375rem; --cds-font-size-heading: 1.0625rem;
+    --cds-font-size-title: 1.75rem; --cds-font-weight-medium: 600;
+    --cds-dur-slow: 300ms; --cds-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --color-fg: #e8eaee; --color-fg-muted: #a3a9b5; --color-bg: #12151a; --color-panel: #1b1f26;
+      --color-border-line: #2c323c; --color-ok: #4cc38a; --color-warn: #e0a83a; --color-bad: #ef6b5b;
+      --cds-text-secondary: #9aa1ad; --cds-surface-popover: #22272f; --cds-border: #353c47;
+      --cds-shadow-popover: 0 6px 24px rgba(0, 0, 0, 0.5);
+      --cds-chart-grid: #262b34; --cds-chart-axis: #4a515d; --cds-chart-reference: #7d8594; --cds-chart-muted: #59606c;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --color-fg: #e8eaee; --color-fg-muted: #a3a9b5; --color-bg: #12151a; --color-panel: #1b1f26;
+    --color-border-line: #2c323c; --color-ok: #4cc38a; --color-warn: #e0a83a; --color-bad: #ef6b5b;
+    --cds-text-secondary: #9aa1ad; --cds-surface-popover: #22272f; --cds-border: #353c47;
+    --cds-shadow-popover: 0 6px 24px rgba(0, 0, 0, 0.5);
+    --cds-chart-grid: #262b34; --cds-chart-axis: #4a515d; --cds-chart-reference: #7d8594; --cds-chart-muted: #59606c;
+  }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--color-bg); color: var(--color-fg); font-family: var(--font-anthropic-sans);
+         font-size: var(--cds-font-size-body); padding: 2rem max(16px, 4vw) 3rem; }
+  #dash-root { max-width: 1180px; margin-inline: auto; }
+  .dash-skeleton:empty { min-height: 1em; }
+  .qx-foot { margin-top: var(--cds-gap-xl); padding-top: var(--cds-gap-md); border-top: 1px solid var(--color-border-line);
+             color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); line-height: 1.6; display: flex;
+             flex-direction: column; gap: var(--cds-gap-sm); max-width: 90ch; }
+  .qx-foot a { color: inherit; }
+  .qx-foot ul { margin: 0; padding-left: 1.1rem; }
+</style>
+</head>
+<body>
+<script>
+(() => {
+  const RAW = {"runs":[{"system":"DGX Spark","family":"NVIDIA","hardware":"NVIDIA DGX Spark (GB10, 128 GB unified), Talos Linux + Kubernetes","model":"flux.1-schnell","hf_id":"black-forest-labs/FLUX.1-schnell","server":"vllm/vllm-omni:v0.32.0-aarch64","size":"1024x1024","steps":"4","images":"32","images_per_min":"10.21","latency_mean_s":"5.873","latency_p50_s":"5.785","latency_p90_s":"6.173","server_gen_mean_s":"5.127","run":"20261112-201834","machine":"spark-talos"},{"system":"QuietBox 2","family":"Tenstorrent","hardware":"Tenstorrent QuietBox 2 (2x p300c, 4x Blackhole), Talos Linux + Kubernetes","model":"flux.1-schnell","hf_id":"black-forest-labs/FLUX.1-schnell","server":"ghcr.io/tenstorrent/tt-media-inference-server:0.18.0-c49bb76","size":"1024x1024","steps":"4","images":"32","images_per_min":"18.73","latency_mean_s":"3.202","latency_p50_s":"3.208","latency_p90_s":"3.223","server_gen_mean_s":"3.18","run":"20261112-201834","machine":"qb2-talos"}],"requests":[{"system":"QuietBox 2","model":"flux.1-schnell","round":"0","prompt":"0","latency_s":"3.191","gen_s":"3.17"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"0","prompt":"1","latency_s":"3.209","gen_s":"3.18"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"0","prompt":"2","latency_s":"3.207","gen_s":"3.19"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"0","prompt":"3","latency_s":"3.225","gen_s":"3.21"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"0","prompt":"4","latency_s":"3.223","gen_s":"3.2"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"0","prompt":"5","latency_s":"3.181","gen_s":"3.16"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"0","prompt":"6","latency_s":"3.174","gen_s":"3.15"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"0","prompt":"7","latency_s":"3.223","gen_s":"3.2"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"0","prompt":"8","latency_s":"3.214","gen_s":"3.19"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"0","prompt":"9","latency_s":"3.169","gen_s":"3.15"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"0","prompt":"10","latency_s":"3.196","gen_s":"3.17"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"0","prompt":"11","latency_s":"3.191","gen_s":"3.17"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"0","prompt":"12","latency_s":"3.135","gen_s":"3.12"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"0","prompt":"13","latency_s":"3.221","gen_s":"3.19"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"0","prompt":"14","latency_s":"3.198","gen_s":"3.18"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"0","prompt":"15","latency_s":"3.218","gen_s":"3.19"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"1","prompt":"0","latency_s":"3.215","gen_s":"3.2"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"1","prompt":"1","latency_s":"3.215","gen_s":"3.19"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"1","prompt":"2","latency_s":"3.235","gen_s":"3.21"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"1","prompt":"3","latency_s":"3.166","gen_s":"3.15"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"1","prompt":"4","latency_s":"3.241","gen_s":"3.22"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"1","prompt":"5","latency_s":"3.187","gen_s":"3.16"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"1","prompt":"6","latency_s":"3.181","gen_s":"3.16"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"1","prompt":"7","latency_s":"3.199","gen_s":"3.18"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"1","prompt":"8","latency_s":"3.223","gen_s":"3.2"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"1","prompt":"9","latency_s":"3.188","gen_s":"3.16"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"1","prompt":"10","latency_s":"3.221","gen_s":"3.2"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"1","prompt":"11","latency_s":"3.202","gen_s":"3.18"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"1","prompt":"12","latency_s":"3.167","gen_s":"3.15"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"1","prompt":"13","latency_s":"3.231","gen_s":"3.21"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"1","prompt":"14","latency_s":"3.213","gen_s":"3.19"},{"system":"QuietBox 2","model":"flux.1-schnell","round":"1","prompt":"15","latency_s":"3.211","gen_s":"3.19"},{"system":"DGX Spark","model":"flux.1-schnell","round":"0","prompt":"0","latency_s":"5.624","gen_s":"5.064"},{"system":"DGX Spark","model":"flux.1-schnell","round":"0","prompt":"1","latency_s":"5.662","gen_s":"5.082"},{"system":"DGX Spark","model":"flux.1-schnell","round":"0","prompt":"2","latency_s":"5.66","gen_s":"5.089"},{"system":"DGX Spark","model":"flux.1-schnell","round":"0","prompt":"3","latency_s":"5.633","gen_s":"5.092"},{"system":"DGX Spark","model":"flux.1-schnell","round":"0","prompt":"4","latency_s":"5.655","gen_s":"5.102"},{"system":"DGX Spark","model":"flux.1-schnell","round":"0","prompt":"5","latency_s":"5.655","gen_s":"5.11"},{"system":"DGX Spark","model":"flux.1-schnell","round":"0","prompt":"6","latency_s":"5.629","gen_s":"5.115"},{"system":"DGX Spark","model":"flux.1-schnell","round":"0","prompt":"7","latency_s":"5.64","gen_s":"5.122"},{"system":"DGX Spark","model":"flux.1-schnell","round":"0","prompt":"8","latency_s":"5.671","gen_s":"5.121"},{"system":"DGX Spark","model":"flux.1-schnell","round":"0","prompt":"9","latency_s":"5.565","gen_s":"5.122"},{"system":"DGX Spark","model":"flux.1-schnell","round":"0","prompt":"10","latency_s":"5.656","gen_s":"5.124"},{"system":"DGX Spark","model":"flux.1-schnell","round":"0","prompt":"11","latency_s":"5.714","gen_s":"5.147"},{"system":"DGX Spark","model":"flux.1-schnell","round":"0","prompt":"12","latency_s":"5.756","gen_s":"5.129"},{"system":"DGX Spark","model":"flux.1-schnell","round":"0","prompt":"13","latency_s":"5.948","gen_s":"5.134"},{"system":"DGX Spark","model":"flux.1-schnell","round":"0","prompt":"14","latency_s":"6.413","gen_s":"5.13"},{"system":"DGX Spark","model":"flux.1-schnell","round":"0","prompt":"15","latency_s":"5.699","gen_s":"5.128"},{"system":"DGX Spark","model":"flux.1-schnell","round":"1","prompt":"0","latency_s":"6.125","gen_s":"5.131"},{"system":"DGX Spark","model":"flux.1-schnell","round":"1","prompt":"1","latency_s":"6.388","gen_s":"5.134"},{"system":"DGX Spark","model":"flux.1-schnell","round":"1","prompt":"2","latency_s":"5.951","gen_s":"5.13"},{"system":"DGX Spark","model":"flux.1-schnell","round":"1","prompt":"3","latency_s":"5.932","gen_s":"5.132"},{"system":"DGX Spark","model":"flux.1-schnell","round":"1","prompt":"4","latency_s":"5.842","gen_s":"5.136"},{"system":"DGX Spark","model":"flux.1-schnell","round":"1","prompt":"5","latency_s":"6.786","gen_s":"5.136"},{"system":"DGX Spark","model":"flux.1-schnell","round":"1","prompt":"6","latency_s":"5.965","gen_s":"5.155"},{"system":"DGX Spark","model":"flux.1-schnell","round":"1","prompt":"7","latency_s":"5.813","gen_s":"5.135"},{"system":"DGX Spark","model":"flux.1-schnell","round":"1","prompt":"8","latency_s":"5.749","gen_s":"5.134"},{"system":"DGX Spark","model":"flux.1-schnell","round":"1","prompt":"9","latency_s":"5.892","gen_s":"5.141"},{"system":"DGX Spark","model":"flux.1-schnell","round":"1","prompt":"10","latency_s":"5.862","gen_s":"5.155"},{"system":"DGX Spark","model":"flux.1-schnell","round":"1","prompt":"11","latency_s":"5.717","gen_s":"5.138"},{"system":"DGX Spark","model":"flux.1-schnell","round":"1","prompt":"12","latency_s":"6.173","gen_s":"5.156"},{"system":"DGX Spark","model":"flux.1-schnell","round":"1","prompt":"13","latency_s":"6.322","gen_s":"5.154"},{"system":"DGX Spark","model":"flux.1-schnell","round":"1","prompt":"14","latency_s":"5.996","gen_s":"5.135"},{"system":"DGX Spark","model":"flux.1-schnell","round":"1","prompt":"15","latency_s":"5.854","gen_s":"5.136"}]};
+  const PARAMS = {"users":"16","model":"gpt-oss-120b","price":0.39};
+  const calcs = {}, subs = [];
+  const colors = ['#2f6fdf', '#13a37a', '#d08a12', '#8a4fd8', '#d64f7a', '#5a6170', '#0f8fb8', '#9a7b1c'];
+  const run = () => subs.forEach((fn) => { try { fn(); } catch (e) { console.error(e); } });
+  const data = (id) => {
+    if (RAW[id]) return { status: 'ok', data: RAW[id], columns: Object.keys(RAW[id][0] || {}), refreshing: false, meta: [] };
+    const c = calcs[id];
+    if (c) {
+      try { return { status: 'ok', data: c.fn(...c.inputs.map((i) => data(i).data)), refreshing: false, meta: [] }; }
+      catch (e) { console.error(e); return { status: 'error', data: [], message: String(e) }; }
+    }
+    return { status: 'missing', data: [] };
+  };
+  let params = { ...PARAMS };
+  window.dash = {
+    colors,
+    data,
+    calc: (id, spec) => { calcs[id] = spec; },
+    loader: () => {},
+    onData: (fn) => { subs.push(fn); try { fn(); } catch (e) { console.error(e); } },
+    params: () => ({ ...params }),
+    setParams: (p) => { params = { ...params, ...p }; run(); },
+    resetParams: () => { params = { ...PARAMS }; run(); },
+    refresh: () => run(),
+    setLink: (name) => { if (name) history.replaceState(null, '', '#' + name); },
+  };
+  let w = window.innerWidth, t;
+  window.addEventListener('resize', () => {
+    if (window.innerWidth === w) return;
+    w = window.innerWidth; clearTimeout(t); t = setTimeout(run, 150);
+  });
+})();
+</script>
+<div id="dash-root">
+<style>
+  .qx { display: flex; flex-direction: column; gap: var(--cds-gap-lg); font-family: var(--font-anthropic-sans); }
+  .qx-head { display: flex; flex-direction: column; gap: var(--cds-gap-sm); }
+  .qx-links { margin: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; font-size: 1rem; }
+  .qx-links a { color: var(--color-text-link, inherit); font-weight: 600; }
+  .qx h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; text-wrap: balance; }
+  .qx-lede { margin: 0; color: var(--color-fg-muted); max-width: 66ch; font-size: var(--cds-font-size-heading); line-height: 1.5; }
+  .qx .qx-lede b { font-weight: 600; color: var(--color-fg); font-variant-numeric: tabular-nums; }
+  .qx-section { display: flex; flex-direction: column; gap: var(--cds-gap-md); scroll-margin-top: 1rem; }
+  .qx-section > h2 { font-size: var(--cds-font-size-title); font-family: var(--font-anthropic-serif); font-weight: var(--cds-font-weight-medium); margin: 0; }
+  .qx-card { position: relative; background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg);
+             display: flex; flex-direction: column; gap: var(--cds-gap-sm); min-width: 0; }
+  .qx-card h3 { font-weight: var(--cds-font-weight-medium); margin: 0; font-size: calc(var(--cds-font-size-heading) * 1.15); }
+  .qx-card p, .qx-card li { margin: 0; color: var(--color-fg-muted); line-height: 1.5; max-width: 80ch; }
+  .qx-card ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: var(--cds-gap-xs); }
+  .qx-grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: var(--cds-gap-lg); }
+  .qx-chart { position: relative; }
+  .qx-chart svg { display: block; overflow: visible; }
+  .qx-chart text { font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-body); fill: var(--color-fg-muted); }
+  .qx-chart text.qx-strong { fill: var(--color-fg); }
+  .qx-chart text.qx-small { font-size: var(--cds-font-size-caption); }
+  .qx-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-lg); color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .qx-legend span { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); }
+  .qx-legend i { width: 0.8rem; height: 0.8rem; border-radius: 50%; display: inline-block; }
+  .qx-legend i.qx-ring { background: transparent; border: 2px solid var(--color-fg-muted); box-sizing: border-box; }
+  .qx-tip { position: absolute; z-index: 4; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border);
+            border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-sm) var(--cds-pad-md);
+            font-size: var(--cds-font-size-caption); display: flex; flex-direction: column; gap: 2px; min-width: 13rem; max-width: 20rem; }
+  .qx-tip[hidden] { display: none; }
+  .qx-tip-h { color: var(--cds-text-secondary); }
+  .qx-tip-r { display: flex; gap: var(--cds-gap-md); }
+  .qx-tip-r b { margin-left: auto; font-weight: var(--cds-font-weight-medium); font-variant-numeric: tabular-nums; }
+  .qx-scroll { overflow-x: auto; }
+  .qx-table { border-collapse: collapse; font-size: var(--cds-font-size-body); font-variant-numeric: tabular-nums; width: 100%; }
+  .qx-table th, .qx-table td { padding: 6px 10px; text-align: right; border-bottom: 1px solid var(--color-border-line); white-space: nowrap; }
+  .qx-table th:first-child, .qx-table td:first-child { text-align: left; }
+  .qx-table thead th { font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); }
+  .qx-table td { color: var(--color-fg); }
+  .qx-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: var(--cds-gap-lg); }
+  .qx-gallery figure { margin: 0; display: flex; flex-direction: column; gap: var(--cds-gap-xs); }
+  .qx-gallery .qx-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .qx-gallery .qx-pair div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .qx-gallery img { width: 100%; height: auto; aspect-ratio: 1; display: block; border-radius: 4px; background: var(--color-border-line); }
+  .qx-gallery .qx-who { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .qx-gallery figcaption { font-size: var(--cds-font-size-caption); color: var(--color-fg); line-height: 1.4; }
+  .qx-note { margin: 0; color: var(--color-fg-muted); max-width: 72ch; line-height: 1.5; }
+</style>
+
+<div class="qx">
+  <header class="qx-head">
+    <h1>Image generation</h1>
+    <p class="qx-lede">
+      FLUX.1-schnell text-to-image on the QuietBox 2 and one DGX Spark, both on Talos Linux and Kubernetes, each with the
+      server its vendor's stack provides. One image at a time at 1024×1024 and 4 steps:
+      <span id="lede">—</span>.
+    </p>
+    <p class="qx-links">
+      <a href="index.html">← Tokens per Joule</a>
+      <a href="talos.html">Talos Linux vs Ubuntu</a>
+      <a href="images.csv">Data (CSV)</a>
+      <a href="https://github.com/rothgar/qb2-vs-spark">Code and data on GitHub</a>
+    </p>
+  </header>
+
+  <section class="qx-section" id="speed">
+    <h2>Speed</h2>
+    <div class="qx-grid2">
+      <div class="qx-card">
+        <h3>Images per minute</h3>
+        <p>32 images, one request at a time, after two discarded warm-up images. Higher is better.</p>
+        <div class="qx-chart" id="ipm-chart"></div>
+      </div>
+      <div class="qx-card">
+        <h3>Seconds per image</h3>
+        <p>Every timed image (a dot each) from request to the finished image back at the client; the bar is the median.
+          The ring is the generation time the server itself reported. Lower is better.</p>
+        <div class="qx-legend" id="lat-key"></div>
+        <div class="qx-chart" id="lat-chart"></div>
+      </div>
+    </div>
+    <div class="qx-card">
+      <h3>Every number</h3>
+      <div class="qx-scroll"><div id="table"></div></div>
+    </div>
+  </section>
+
+  <section class="qx-section" id="images">
+    <h2>The images</h2>
+    <div class="qx-card">
+      <p>The first pass over the prompt set, same prompt and seed on both. The two stacks seed their noise differently,
+        so the same seed does not give the same picture; shown at 512×512 (generated at 1024×1024).</p>
+      <div class="qx-gallery" id="gallery"></div>
+    </div>
+  </section>
+
+  <section class="qx-section" id="notes">
+    <h2>Reading these results</h2>
+    <div class="qx-card">
+      <ul>
+        <li>The QuietBox 2 ran Tenstorrent's media server (<code>tt-media-inference-server</code> 0.18.0, the
+          FLUX.1-schnell build marked complete for p300x2 in tt-inference-server's catalog) across all four Blackhole
+          chips, with the settings from Tenstorrent's Helm chart, firmware 19.15.0. The DGX Spark ran
+          <a href="https://github.com/vllm-project/vllm-omni">vLLM-Omni</a> 0.32.0 (the vLLM project's server for
+          diffusion models; plain vLLM serves text only) on its GB10 with NVIDIA driver 595, in BF16.</li>
+        <li>Both serve one image at a time (batch size 1), so there is no concurrent-user test: a second request
+          waits for the first.</li>
+        <li>Most of the gap is generation itself: about 3.2 s on the QuietBox 2 against 5.1 s on the Spark. The Spark
+          also spends about 0.75 s per image after generation, mostly encoding and sending a PNG about twice the size
+          the QuietBox 2 sends; the QuietBox 2's overhead is a few hundredths of a second.</li>
+        <li>Requests went through <code>kubectl port-forward</code> from a workstation on the same network for both
+          machines, which adds a little to every request on both.</li>
+        <li>Not measured yet: startup time (the QuietBox 2's first boot took about 8 minutes to download the weights,
+          compile and warm up), wall power, larger images, and two Sparks.</li>
+      </ul>
+    </div>
+  </section>
+
+<footer class="qx-foot">
+  <p><b>Method.</b> <code>tools/image_bench.py</code> sends 16 fixed prompts twice (seeds 42 and 43) to each server's
+  <code>/v1/images/generations</code>, one request at a time, after two warm-up requests that are not counted, and
+  times each from request to decoded response. Images per minute is 32 divided by the wall time of the timed requests.</p>
+  <p><b>Data and code:</b> <a href="images.csv">images.csv</a>, per-image times and every image in
+  <code>results/*/flux.1-schnell/</code> at <a href="https://github.com/rothgar/qb2-vs-spark">github.com/rothgar/qb2-vs-spark</a>. Built 2026-11-13.</p>
+</footer>
+</div>
+
+<script>
+(() => {
+  const SYS_COLOR = { 'QuietBox 2': 0, 'DGX Spark': 1, '2x DGX Spark': 2 };   // the main page's colors
+  const color = (s) => dash.colors[SYS_COLOR[s] ?? 5];
+  const SLUG = { 'QuietBox 2': 'qb2-talos', 'DGX Spark': 'spark-talos' };
+  const PROMPTS = [
+    'a red fox in a snowy pine forest at dawn, photorealistic',
+    'a lighthouse on a rocky coast during a storm, oil painting',
+    'a bowl of ramen on a wooden table, overhead shot, food photography',
+    'an astronaut riding a horse on mars, cinematic lighting',
+    'a cozy reading nook with a cat asleep on a stack of books, watercolor',
+    'a futuristic city skyline at night with neon signs reflected in rain puddles',
+    'a close-up portrait of an elderly fisherman with a weathered face, black and white photo',
+    'a hot air balloon festival over a valley at sunrise, wide angle',
+    'a robot watering plants in a greenhouse, studio ghibli style',
+    'a mountain lake with perfect reflections of snowy peaks, landscape photography',
+    'a vintage red bicycle leaning against a yellow wall in a mediterranean village',
+    'a macro photo of a dewdrop on a spider web at sunrise',
+    'an isometric illustration of a tiny island with a cabin and a dock',
+    'a golden retriever puppy playing in autumn leaves',
+    'a steaming cup of coffee next to a laptop on a rainy windowsill',
+    'a medieval castle on a cliff above the sea, fantasy concept art',
+  ];
+  const f1 = d3.format(',.1f'), f2 = d3.format(',.2f');
+  const rowsOf = (id) => { const d = dash.data(id); return d.status === 'ok' ? d.data : []; };
+
+  const tip = (() => {
+    let el;
+    return {
+      show(host, ev, head, lines) {
+        if (!el || !host.contains(el)) { el = document.createElement('div'); el.className = 'qx-tip'; host.appendChild(el); }
+        el.replaceChildren();
+        const h = document.createElement('div'); h.className = 'qx-tip-h'; h.textContent = head; el.appendChild(h);
+        for (const [k, v] of lines) {
+          const r = document.createElement('div'); r.className = 'qx-tip-r';
+          const a = document.createElement('span'); a.textContent = k;
+          const b = document.createElement('b'); b.textContent = v;
+          r.append(a, b); el.appendChild(r);
+        }
+        el.hidden = false;
+        const box = host.getBoundingClientRect(), w = el.offsetWidth, hh = el.offsetHeight;
+        const x = ev.clientX - box.left, y = ev.clientY - box.top;
+        el.style.left = `${Math.max(0, Math.min(box.width - w, x + 14 > box.width - w ? x - w - 14 : x + 14))}px`;
+        el.style.top = `${Math.max(0, y - hh - 10)}px`;
+      },
+      hide() { if (el) el.hidden = true; },
+    };
+  })();
+
+  // the gallery is static: build it once
+  (() => {
+    const g = document.getElementById('gallery');
+    const systems = d3.sort(rowsOf('runs'), (r) => -+r.images_per_min).map((r) => r.system);   // the charts' order
+    PROMPTS.forEach((p, i) => {
+      const fig = document.createElement('figure'), pair = document.createElement('div');
+      pair.className = 'qx-pair';
+      for (const s of systems) {
+        const d = document.createElement('div'), img = document.createElement('img'), who = document.createElement('span');
+        img.src = `img/flux/${SLUG[s]}-r0-p${String(i).padStart(2, '0')}.jpg`; img.loading = 'lazy';
+        img.width = 512; img.height = 512; img.alt = `${s}: ${p}`;
+        who.className = 'qx-who'; who.textContent = s;
+        d.append(img, who); pair.appendChild(d);
+      }
+      const cap = document.createElement('figcaption'); cap.textContent = p;
+      fig.append(pair, cap); g.appendChild(fig);
+    });
+  })();
+
+  // redraw once layout has settled: the first draw can run before the cards have their final width
+  window.addEventListener('load', () => requestAnimationFrame(() => dash.refresh()));
+
+  dash.onData(() => {
+    const runs = d3.sort(rowsOf('runs'), (r) => -+r.images_per_min), reqs = rowsOf('requests');
+    if (!runs.length) return;
+
+    // lede
+    const lede = [];
+    runs.forEach((r, i) => {
+      const b = document.createElement('b'); b.textContent = `${f1(+r.images_per_min)} images a minute`;
+      lede.push(...(i ? ['; '] : []), `the ${r.system} made `, b, ` (${f2(+r.latency_mean_s)} s each)`);
+    });
+    if (runs.length === 2) {
+      const b = document.createElement('b'); b.textContent = `${f2(+runs[0].images_per_min / +runs[1].images_per_min)}×`;
+      lede.push(', so the ', runs[0].system, ' was ', b, ' as fast');
+    }
+    document.getElementById('lede').replaceChildren(...lede);
+
+    // images per minute: horizontal bars, value labels at the bar end
+    {
+      const host = document.getElementById('ipm-chart'), W = host.clientWidth || 500;
+      const labelW = Math.min(130, W * 0.3), rowH = 44, H = runs.length * rowH + 24;
+      const x = d3.scaleLinear().domain([0, d3.max(runs, (r) => +r.images_per_min) * 1.08]).nice().range([labelW, W - 56]);
+      host.replaceChildren();
+      const svg = d3.select(host).append('svg').attr('width', W).attr('height', H).attr('role', 'img')
+        .attr('aria-label', 'Images per minute: ' + runs.map((r) => `${r.system} ${f1(+r.images_per_min)}`).join(', '));
+      svg.append('g').selectAll('line').data(x.ticks(5)).join('line')
+        .attr('x1', (t) => x(t)).attr('x2', (t) => x(t)).attr('y1', 0).attr('y2', H - 20)
+        .attr('stroke', (t) => t === 0 ? 'var(--cds-chart-reference)' : 'var(--cds-chart-grid)');
+      svg.append('g').selectAll('text').data(x.ticks(5)).join('text')
+        .attr('x', (t) => x(t)).attr('y', H - 4).attr('text-anchor', 'middle').attr('class', 'qx-small').text((t) => t);
+      runs.forEach((r, i) => {
+        const y = i * rowH + 8, v = +r.images_per_min;
+        svg.append('text').attr('x', labelW - 10).attr('y', y + 18).attr('text-anchor', 'end').attr('class', 'qx-strong').text(r.system);
+        svg.append('path').attr('fill', color(r.system))
+          .attr('d', `M${x(0)},${y}h${x(v) - x(0) - 4}a4,4 0 0 1 4,4v18a4,4 0 0 1 -4,4h${-(x(v) - x(0) - 4)}z`);
+        svg.append('text').attr('x', x(v) + 6).attr('y', y + 18).attr('class', 'qx-strong').text(f1(v));
+        svg.append('rect').attr('x', 0).attr('y', y - 6).attr('width', W).attr('height', rowH - 4).attr('fill', 'transparent')
+          .on('pointerenter pointermove', (ev) => tip.show(host, ev, `${r.system}, ${r.model}`, [
+            ['Images per minute', f1(v)], ['Mean per image', `${f2(+r.latency_mean_s)} s`], ['Images timed', r.images]]))
+          .on('pointerleave', () => tip.hide());
+      });
+    }
+
+    // seconds per image: a dot per image, median bar, ring at the server's own generation time
+    {
+      const host = document.getElementById('lat-chart'), W = host.clientWidth || 500;
+      const labelW = Math.min(130, W * 0.3), rowH = 44, H = runs.length * rowH + 24;
+      const x = d3.scaleLinear().domain([0, d3.max(reqs, (r) => +r.latency_s) * 1.08]).nice().range([labelW, W - 56]);
+      document.getElementById('lat-key').replaceChildren(...runs.map((r) => {
+        const sp = document.createElement('span'), i = document.createElement('i'); i.style.background = color(r.system);
+        sp.append(i, r.system); return sp;
+      }), (() => { const sp = document.createElement('span'), i = document.createElement('i'); i.className = 'qx-ring';
+                   sp.append(i, 'Server-reported generation time'); return sp; })());
+      host.replaceChildren();
+      const svg = d3.select(host).append('svg').attr('width', W).attr('height', H).attr('role', 'img')
+        .attr('aria-label', 'Seconds per image: ' + runs.map((r) => `${r.system} median ${f2(+r.latency_p50_s)} s`).join(', '));
+      svg.append('g').selectAll('line').data(x.ticks(6)).join('line')
+        .attr('x1', (t) => x(t)).attr('x2', (t) => x(t)).attr('y1', 0).attr('y2', H - 20)
+        .attr('stroke', (t) => t === 0 ? 'var(--cds-chart-reference)' : 'var(--cds-chart-grid)');
+      svg.append('g').selectAll('text').data(x.ticks(6)).join('text')
+        .attr('x', (t) => x(t)).attr('y', H - 4).attr('text-anchor', 'middle').attr('class', 'qx-small').text((t) => `${t} s`);
+      runs.forEach((r, i) => {
+        const cy = i * rowH + 20, c = color(r.system), items = reqs.filter((q) => q.system === r.system);
+        svg.append('text').attr('x', labelW - 10).attr('y', cy + 5).attr('text-anchor', 'end').attr('class', 'qx-strong').text(r.system);
+        if (r.server_gen_mean_s) svg.append('circle').attr('cx', x(+r.server_gen_mean_s)).attr('cy', cy).attr('r', 7)
+          .attr('fill', 'none').attr('stroke', 'var(--color-fg-muted)').attr('stroke-width', 2);
+        svg.append('g').selectAll('circle').data(items).join('circle')
+          .attr('cx', (q) => x(+q.latency_s)).attr('cy', cy).attr('r', 4.5).attr('fill', c).attr('fill-opacity', 0.6)
+          .attr('stroke', 'var(--color-panel)').attr('stroke-width', 1);
+        svg.append('rect').attr('x', x(+r.latency_p50_s) - 1.5).attr('y', cy - 11).attr('width', 3).attr('height', 22).attr('rx', 1.5)
+          .attr('fill', 'var(--color-fg)');
+        svg.append('text').attr('x', W - 50).attr('y', cy + 5).attr('class', 'qx-strong').text(`${f2(+r.latency_p50_s)} s`);
+        svg.append('g').selectAll('circle').data(items).join('circle')
+          .attr('cx', (q) => x(+q.latency_s)).attr('cy', cy).attr('r', 9).attr('fill', 'transparent')
+          .on('pointerenter pointermove', (ev, q) => tip.show(host, ev, `${r.system}: “${PROMPTS[+q.prompt] ?? ''}” (seed ${42 + +q.round})`, [
+            ['Request to image', `${f2(+q.latency_s)} s`], ...(q.gen_s ? [['Server generation', `${f2(+q.gen_s)} s`]] : [])]))
+          .on('pointerleave', () => tip.hide());
+      });
+    }
+
+    // every number
+    {
+      const cols = [['System', (r) => r.system], ['Server', (r) => r.server.replace(/^.*\//, '')],
+                    ['Images per minute', (r) => f1(+r.images_per_min)], ['Mean', (r) => `${f2(+r.latency_mean_s)} s`],
+                    ['Median', (r) => `${f2(+r.latency_p50_s)} s`], ['90th percentile', (r) => `${f2(+r.latency_p90_s)} s`],
+                    ['Server generation', (r) => r.server_gen_mean_s ? `${f2(+r.server_gen_mean_s)} s` : '–'],
+                    ['Images', (r) => r.images]];
+      const t = document.createElement('table'); t.className = 'qx-table';
+      const hr = t.createTHead().insertRow();
+      for (const [h] of cols) { const th = document.createElement('th'); th.textContent = h; hr.appendChild(th); }
+      const tb = t.createTBody();
+      for (const r of runs) { const tr = tb.insertRow(); for (const [, f] of cols) tr.insertCell().textContent = f(r); }
+      document.getElementById('table').replaceChildren(t);
+    }
+  });
+})();
+</script>
+
+</div>
+</body>
+</html>
