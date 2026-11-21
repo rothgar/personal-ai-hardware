@@ -7,9 +7,11 @@ single Tenstorrent card and an AMD GPU; any machine that can serve an OpenAI-com
 
 - [uv](https://docs.astral.sh/uv/) and a clone of this repo.
 - Enough memory for the models you want to test (the table below for Macs).
-- Optional but valuable: a **Shelly Gen2 or newer smart plug** (Plug S, Plug US Gen4 and similar) between the machine
-  and the wall. With one, the page shows your tokens per joule and running cost; without one, you can still send
-  speed results. macOS `powermetrics` measures the chip, not the wall, so it isn't used.
+- Optional but valuable: a **Shelly Gen2 or newer smart plug** between the machine and the wall, such as the
+  [Plug US Gen4](https://us.shelly.com/products/shelly-plug-us-gen4-white) (US, 15 A) or the
+  [Plug S MTR Gen3](https://www.shelly.com/blogs/documentation/shelly-plug-s-mtr-gen3) (EU). `tools/powerlog.py` reads it
+  once a second over its local [Gen2 API](https://shelly-api-docs.shelly.cloud/gen2/); keep it on the same network.
+  With one, the page shows your tokens per joule and running cost; without one, you can still send speed results. macOS `powermetrics` measures the chip, not the wall, so it isn't used.
 
 ## How much memory each model needs on a Mac
 
@@ -107,6 +109,44 @@ ROCm container. `gpu: rocm` gives the container the AMD GPU devices (`/dev/kfd`,
 The Spark's Nemotron build is NVFP4 and needs an NVIDIA GPU, so expect that one to fail. Which image you used, and
 which models loaded, are worth reporting in [issue #2](https://github.com/rothgar/qb2-vs-spark/issues/2) even before
 you have results.
+
+## Run the tests on an NVIDIA card (RTX 5090, RTX PRO 6000 and others)
+
+A desktop with an NVIDIA card runs the same Hugging Face builds as the DGX Spark, with vLLM in NVIDIA's container,
+like the `rtx6000` machine in `bench.yaml`. You need Linux with the NVIDIA driver, Docker and the NVIDIA Container
+Toolkit (`docker run --gpus all` has to work).
+
+1. **Describe the machine in `bench.yaml`.** Copy the `rtx6000` entry under a new id, set its label, hardware, price
+   and kind (`card`: the plug measures the whole workstation, but the page's budget filter prices just the card), and
+   use the Spark's builds:
+
+   ```yaml
+     rtx5090:
+       label: GeForce RTX 5090
+       price_usd: 1999
+       kind: card
+       family: NVIDIA
+       hardware: "NVIDIA GeForce RTX 5090 (Blackwell, 32 GB GDDR7) in a workstation"
+       launcher: vllm-docker
+       image: nvcr.io/nvidia/vllm:26.09-py3      # Blackwell cards need a recent image
+       bench_python: ~/bench/vllm-client.sh
+       models_from: spark
+       remote_dir: ~/bench
+       port: 8000
+   ```
+
+2. **Pick the models that fit in the card's memory.** The weights have to fit with room left for the KV cache:
+
+   | card memory | Spark builds that fit |
+   |---|---|
+   | 24–32 GB (RTX 4090, RTX 5090) | `qwen3-8b`, `gpt-oss-20b`, `nemotron-3.5-lightning-30b-a3b` (NVFP4, Blackwell only) |
+   | 48 GB (RTX 6000 Ada, RTX PRO 5000) | the above, plus `devstral-small-2-24b` |
+   | 96 GB (RTX PRO 6000 Blackwell) | every Spark build, including `gpt-oss-120b`; `qwen3-coder-next` (FP8, ~80 GB) is tight |
+
+3. Add the id to `machines.yaml` with its ssh target (or `ssh: local`) and plug, then run model by model:
+   `./bench.py run rtx5090 -m gpt-oss-20b --dry-run`, then `-m gpt-oss-20b -w power`, then the rest.
+
+The plug measures the whole workstation (CPU, fans and the card), the same as every other system on the page.
 
 ## Send a pull request
 
