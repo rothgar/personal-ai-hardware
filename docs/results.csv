@@ -897,3 +897,14 @@ QuietBox 2 (4-chip build),Tenstorrent,qwen3.6-35b-a3b,MoE,BF16,35,3,agent-64k,65
 QuietBox 2 (4-chip build),Tenstorrent,qwen3.6-35b-a3b,MoE,BF16,35,3,agent-128k,130816,256,1,71.69,7.58,30208.9,33765.9,0.0296,923.1,0.008
 QuietBox 2 (4-chip build),Tenstorrent,qwen3.6-35b-a3b,MoE,BF16,35,3,ctx-128k,130816,256,1,68.33,7.56,30123.2,33855.2,0.0295,915.0,0.008
 QuietBox 2 (4-chip build),Tenstorrent,qwen3.6-35b-a3b,MoE,BF16,35,3,agent-128k,130816,256,4,15.3,7.93,112424.4,129086.9,0.031,931.4,0.009
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,chat,128,256,1,134.12,129.07,81.9,1983.2,0.5042,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,chat,128,256,4,109.39,321.22,269.6,2600.7,1.2548,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,users,1024,256,1,130.58,122.17,142.3,2095.2,0.4772,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,users,1024,256,2,152.37,248.41,214.2,1887.8,0.9704,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,users,1024,256,4,126.76,422.4,303.5,2315.1,1.65,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,users,1024,256,8,73.26,399.05,655.8,4136.4,1.5588,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,codegen,1024,1024,1,127.74,125.64,141.8,8150.1,0.1227,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,codegen,1024,1024,4,104.66,317.68,369.0,10143.8,0.3102,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,agent-turn,8192,512,1,227.34,163.45,884.4,3132.2,0.3192,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,agent-turn,8192,512,4,108.67,312.58,1612.5,6314.6,0.6105,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,agent-long,32768,256,1,121.52,47.54,3286.5,5384.8,0.1857,,
