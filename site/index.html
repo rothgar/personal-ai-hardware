@@ -6,6 +6,9 @@
   .qx h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; text-wrap: balance; }
   .qx-lede { margin: 0; color: var(--color-fg-muted); max-width: 64ch; font-size: var(--cds-font-size-heading); line-height: 1.5; }
   .qx .qx-lede b { font-weight: 600; color: var(--color-fg); font-variant-numeric: tabular-nums; }
+  .qx .qx-verdict strong { display: block; font-family: var(--font-anthropic-serif); font-weight: 400; color: var(--color-fg);
+    font-size: 1.45em; line-height: 1.25; margin-bottom: 0.25rem; text-wrap: balance; }
+  .qx-method { margin: 0; color: var(--color-fg-muted); max-width: 72ch; font-size: 0.95rem; line-height: 1.5; }
   .qx-bar { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); align-items: center; justify-content: space-between; }
   .qx-seg { display: inline-flex; flex-wrap: wrap; max-width: 100%; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); overflow: hidden; }
   .qx-seg button { font: inherit; font-size: var(--cds-font-size-body); padding: var(--cds-pad-sm) var(--cds-pad-lg); background: transparent; color: var(--color-fg-muted); border: 0; cursor: pointer; }
@@ -75,17 +78,30 @@
 <div class="qx">
   <header class="qx-head">
     <h1>Tokens per Joule</h1>
-    <p class="qx-lede">
-      How many output tokens open-weight models produce per joule of wall power on
-      <span data-source="headline" data-field="families" data-where="users=16">Tenstorrent and NVIDIA</span> hardware.
-      Every machine runs the same prompts under the same load, and a smart plug measures the whole box at the wall.
-      With 16 users the most efficient run was
-      <b class="dash-skeleton" data-source="headline" data-field="best" data-where="users=16">—</b> at
-      <b class="dash-skeleton" data-source="headline" data-field="best_tpj" data-where="users=16">—</b> tokens per joule,
-      <b class="dash-skeleton" data-source="headline" data-field="spread" data-where="users=16">—</b>× the least efficient;
-      with one user it was
-      <b class="dash-skeleton" data-source="headline" data-field="best" data-where="users=1">—</b> at
-      <b class="dash-skeleton" data-source="headline" data-field="best_tpj" data-where="users=1">—</b>.
+    <p class="qx-lede qx-verdict">
+      <strong>For one person, buy a DGX Spark and run Qwen3.6 35B A3B.</strong>
+      It scores <b class="dash-skeleton" data-source="verdict" data-field="one_aa">—</b> on the Artificial Analysis
+      Intelligence Index and writes <b class="dash-skeleton" data-source="verdict" data-field="one_tps">—</b> tokens a
+      second at <b class="dash-skeleton" data-source="verdict" data-field="one_tpj">—</b> tokens per joule on about
+      <b class="dash-skeleton" data-source="verdict" data-field="one_w">—</b> watts:
+      <span data-source="verdict" data-field="one_first">the most efficient</span> of every model here scoring 15 or more.
+    </p>
+    <p class="qx-lede qx-verdict">
+      <strong>For a team of coding agents with long prompts, buy a QuietBox 2 and run Qwen3.8 27B.</strong>
+      With four agents each sending 8K-token prompts, every agent gets
+      <b class="dash-skeleton" data-source="verdict" data-field="ag_tps">—</b> tokens a second and its first token in
+      <b class="dash-skeleton" data-source="verdict" data-field="ag_ttft">—</b> s
+      (<span data-source="verdict" data-field="ag_first">sooner than any other build here</span>). Together they get
+      <b class="dash-skeleton" data-source="verdict" data-field="ag_total">—</b> tokens a second,
+      <b class="dash-skeleton" data-source="verdict" data-field="ag_more">—</b>×
+      <span data-source="verdict" data-field="ag_total_best">the next best build</span>, at about
+      <b class="dash-skeleton" data-source="verdict" data-field="ag_w">—</b> watts.
+    </p>
+    <p class="qx-method">
+      Open-weight models on <span data-source="headline" data-field="families" data-where="users=16">Tenstorrent and NVIDIA</span>
+      hardware, every machine running the same prompts under the same load, with a smart plug measuring the whole box
+      at the wall. The Qwen3.8 build serves up to 8 users with a DFlash2 draft model and has no Intelligence Index
+      score yet.
     </p>
     <p class="qx-links">
       <a href="talos.html">Talos Linux vs Ubuntu</a>
@@ -415,6 +431,45 @@
         families: fams.length > 1 ? `${fams.slice(0, -1).join(', ')} and ${fams[fams.length - 1]}` : fams[0],
       };
     }),
+  });
+  // The opening verdict: two named picks, every number read from the results so it stays true as runs change.
+  dash.calc('verdict', {
+    title: 'Opening verdict',
+    description: 'One user: DGX Spark + qwen3.6-35b-a3b in the power test, and how it ranks for efficiency among models scoring >= 15 on the AA index. Agents: QuietBox 2 DFlash2 + qwen3.8-27b in agent-turn (8K prompts) with 4 users, against every other build at that load. Ignores the legend filter.',
+    inputs: ['results', 'aa_index'],
+    fn: (results, aa) => {
+      const score = Object.fromEntries(aa.map((a) => [a.model, +a.aa_index]));
+      const one = results.find((r) => r.workload === 'power' && r.users === '1' && r.system === 'DGX Spark' && r.model === 'qwen3.6-35b-a3b');
+      const capable = results.filter((r) => r.workload === 'power' && r.users === '1' && r.tok_per_j !== '' && score[r.model] >= 15)
+        .sort((a, b) => b.tok_per_j - a.tok_per_j);
+      const AG = 'QuietBox 2 (DFlash2 speculative, Talos)';
+      const at4 = results.filter((r) => r.workload === 'agent-turn' && r.users === '4' && r.ttft_ms !== '');
+      const ag = at4.find((r) => r.system === AG && r.model === 'qwen3.8-27b');
+      const others = at4.filter((r) => r !== ag).sort((a, b) => a.ttft_ms - b.ttft_ms);
+      const most = d3.max(at4, (r) => +r.total_tok_s);
+      return [{
+        one_tps: one ? Math.round(one.decode_tok_s_user) : null,
+        one_tpj: one ? (+one.tok_per_j).toFixed(2) : null,
+        one_w: one?.wall_w ? Math.round(one.wall_w) : null,
+        one_aa: score['qwen3.6-35b-a3b'] ?? null,
+        one_first: one && capable[0] === one ? 'the most efficient' : 'one of the most efficient',
+        ag_tps: ag ? Math.round(ag.decode_tok_s_user) : null,
+        ag_ttft: ag ? (ag.ttft_ms / 1000).toFixed(1) : null,
+        ag_total: ag ? Math.round(ag.total_tok_s) : null,
+        ag_first: ag && others.length && +ag.ttft_ms <= +others[0].ttft_ms ? 'sooner than any other build here' : 'among the soonest of any build here',
+        ag_more: ag && at4.length > 1 ? (ag.total_tok_s / d3.max(at4.filter((r) => r !== ag), (r) => +r.total_tok_s)).toFixed(1) : null,
+        ag_total_best: ag && +ag.total_tok_s === most ? 'the next best build' : 'the best build',
+        ag_w: ag?.wall_w ? Math.round(ag.wall_w / 10) * 10 : null,
+      }];
+    },
+  });
+  dash.onData(() => {
+    const v = dash.data('verdict');
+    document.querySelectorAll('[data-source="verdict"]').forEach((el) => {
+      const val = v.status === 'ok' ? v.data[0]?.[el.dataset.field] : null;
+      el.textContent = val != null ? String(val) : '—';
+      if (v.status !== 'loading') el.classList.remove('dash-skeleton');
+    });
   });
   dash.onData(() => {
     const c = dash.data('headline');
