@@ -21,7 +21,7 @@
   .qx-check { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); white-space: nowrap; cursor: pointer; }
   .qx-check input { accent-color: var(--color-fg); margin: 0; }
   .qx-budget-note { flex-basis: 100%; color: var(--color-fg-muted); font-size: 0.85rem; }
-  .qx .qx-legend button.qx-out { opacity: 0.35; cursor: not-allowed; text-decoration: none; }
+  .qx .qx-legend button.qx-out { opacity: 0.35; cursor: not-allowed; text-decoration: none; background: transparent; border-style: dotted; }
   .qx .qx-legend button.qx-out i { filter: grayscale(1); }
   .qx-seg { display: inline-flex; flex-wrap: wrap; max-width: 100%; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); overflow: hidden; }
   .qx-seg button { font: inherit; font-size: var(--cds-font-size-body); padding: var(--cds-pad-sm) var(--cds-pad-lg); background: transparent; color: var(--color-fg-muted); border: 0; cursor: pointer; }
@@ -30,17 +30,25 @@
   @media (max-width: 600px) { .qx-seg .qx-unit { display: none; } .qx-seg button { padding-inline: var(--cds-pad-md, 0.75rem); } }
   .qx-seg button[aria-pressed="true"] { background: var(--color-panel); color: var(--color-fg); font-weight: var(--cds-font-weight-medium); }
   .qx-seg button:focus-visible, .qx-select:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 1px; }
-  .qx-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-lg); font-size: var(--cds-font-size-body); color: var(--color-fg-muted); }
+  .qx-legend { display: flex; flex-wrap: wrap; align-items: center; gap: var(--cds-gap-sm) var(--cds-gap-sm); font-size: var(--cds-font-size-body); color: var(--color-fg-muted); }
   .qx-legend span { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); }
-  .qx-legend i { width: 0.8rem; height: 0.8rem; border-radius: 50%; display: inline-block; }
+  .qx-legend i { width: 0.8rem; height: 0.8rem; border-radius: 50%; display: inline-block; flex: none; }
   .qx-legend svg { display: block; }
-  .qx .qx-legend .qx-fam { color: var(--color-fg); font-weight: var(--cds-font-weight-medium); margin-left: var(--cds-gap-sm); }
-  .qx .qx-legend .qx-fam:first-child { margin-left: 0; }
-  .qx-legend button { font: inherit; color: inherit; background: none; border: 0; padding: 2px 4px; margin: -2px -4px; border-radius: var(--cds-radius); cursor: pointer; display: inline-flex; align-items: center; gap: var(--cds-gap-xs); }
-  .qx-legend button:hover { background: var(--color-panel); }
-  .qx-legend button:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 1px; }
-  .qx-legend button[aria-pressed="false"] { opacity: 0.45; text-decoration: line-through; }
-  .qx .qx-legend .qx-reset { text-decoration: underline; color: var(--color-fg); }
+  /* each system is a pill button, like a filter chip: click to hide or show it in every chart */
+  .qx-legend button { font: inherit; color: var(--color-fg); background: var(--color-panel); border: 1px solid var(--color-border-line);
+    border-radius: 999px; padding: 0.2rem 0.7rem 0.2rem 0.55rem; cursor: pointer; display: inline-flex; align-items: center;
+    gap: var(--cds-gap-xs); line-height: 1.4; transition: background 0.1s, border-color 0.1s; }
+  .qx-legend button:hover { border-color: var(--color-fg-muted); background: var(--color-bg); }
+  .qx-legend button:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+  .qx-legend button[aria-pressed="false"] { color: var(--color-fg-muted); background: transparent; border-style: dashed; opacity: 0.6; text-decoration: line-through; }
+  /* a family name is a button too (hides or shows the whole family), drawn as a bold label that starts its group */
+  .qx .qx-legend .qx-fam { font-weight: var(--cds-font-weight-medium); background: transparent; border-color: transparent;
+    padding-inline: 0.35rem; margin-left: var(--cds-gap-md); }
+  .qx .qx-legend .qx-fam:hover { border-color: var(--color-border-line); }
+  .qx .qx-legend .qx-fam { margin-left: 0; min-width: 7.5rem; justify-content: flex-start; }
+  .qx-legend .qx-break { flex-basis: 100%; height: 0; }
+  .qx .qx-legend .qx-fam[aria-pressed="false"] { border-style: solid; border-color: transparent; }
+  .qx .qx-legend .qx-reset { text-decoration: underline; background: transparent; border: 0; padding: 0; color: var(--color-fg); }
   .qx-legend-hint { flex-basis: 100%; font-size: var(--cds-font-size-small, 0.8rem); color: var(--color-fg-muted); }
   .qx-section { display: flex; flex-direction: column; gap: var(--cds-gap-md); }
   .qx-section > h2 { font-size: var(--cds-font-size-title); font-family: var(--font-anthropic-serif); font-weight: 400; font-weight: var(--cds-font-weight-medium); margin: 0; }
@@ -132,7 +140,7 @@
     <fieldset class="qx-budget" id="budget">
       <legend>Budget</legend>
       <label class="qx-budget-range">
-        <span class="qx-budget-label">Up to <b id="budget-value">any price</b></span>
+        <span class="qx-budget-label">Up to <b id="budget-value">—</b></span>
         <input type="range" id="budget-range" min="0" max="0" step="1" value="0" aria-describedby="budget-note">
       </label>
       <label class="qx-check"><input type="checkbox" id="kind-system" checked> Complete systems</label>
@@ -560,9 +568,10 @@
     const v = JSON.parse(localStorage.getItem('qx-budget') || 'null');
     if (v) dash.setParams({ budget: v.budget === '' ? undefined : v.budget, kinds: v.kinds });
   } catch (e) { /* no storage */ }
+  // the slider runs from the cheapest machine to the most expensive; at the top end nothing is filtered by price
   range.addEventListener('input', () => {
     const s = stops(), i = +range.value;
-    setBudget({ budget: i >= s.length ? undefined : s[i], kinds: QB.budget().kinds.join('|') });
+    setBudget({ budget: i >= s.length - 1 ? undefined : s[i], kinds: QB.budget().kinds.join('|') });
   });
   for (const [kind, box] of Object.entries(kindBox)) {
     box.addEventListener('change', () => {
@@ -572,10 +581,12 @@
   }
   dash.onData(() => {
     const s = stops(), b = QB.budget();
-    range.max = String(s.length);                     // one stop per price, plus "any price"
-    const i = b.max == null ? s.length : Math.max(0, s.findIndex((p) => p >= b.max));
+    range.max = String(Math.max(0, s.length - 1));    // one stop per machine price, the last is the most expensive
+    const at = b.max == null ? -1 : s.findIndex((p) => p >= b.max);
+    const i = at < 0 ? s.length - 1 : at;
     if (document.activeElement !== range) range.value = String(i);
-    shown.textContent = b.max == null ? 'any price' : `$${d3.format(',')(b.max)}`;
+    const top = s.length ? s[s.length - 1] : null;
+    shown.textContent = b.max != null ? `$${d3.format(',')(b.max)}` : top != null ? `$${d3.format(',')(top)}` : 'any price';
     range.setAttribute('aria-valuetext', shown.textContent);
     for (const [kind, box] of Object.entries(kindBox)) box.checked = b.kinds.includes(kind);
   });
@@ -600,6 +611,7 @@
       if (grouped && QB.familyOf(s) !== fam) {
         fam = QB.familyOf(s);
         const name = fam || 'Other';
+        if (fam !== QB.familyOf(systems[0])) add(document.createElement('span')).className = 'qx-break';   // each family on its own line
         const fb = add(document.createElement('button'));
         fb.type = 'button';
         fb.className = 'qx-fam';
