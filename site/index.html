@@ -27,6 +27,17 @@
       radial-gradient(35% 70% at 62% 115%, color-mix(in srgb, #e0582e 12%, transparent), transparent 70%),
       var(--color-panel); }
   .qx-hero-bar { display: flex; gap: 0.45rem; }
+  /* GitHub star button (top right of the hero, and in Add your hardware), with the live star count when GitHub answers */
+  .qx-star { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.4rem 0.75rem 0.4rem 0.65rem; border-radius: 999px;
+    border: 1px solid var(--color-border-line); background: var(--color-panel); color: var(--color-fg); text-decoration: none;
+    font-size: 0.95rem; font-weight: 600; line-height: 1.2; white-space: nowrap; transition: border-color 0.1s, background 0.1s; }
+  .qx-star svg { color: #e3b341; flex: none; }
+  .qx-star:hover { border-color: var(--color-fg-muted); background: var(--color-bg); }
+  .qx-star:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+  .qx-star-count { font-variant-numeric: tabular-nums; padding-left: 0.5rem; margin-left: 0.1rem; border-left: 1px solid var(--color-border-line); }
+  .qx-hero > .qx-star { position: absolute; top: clamp(1rem, 3vw, 1.75rem); right: clamp(1rem, 3vw, 1.75rem); }
+  @media (max-width: 600px) { .qx-hero > .qx-star { position: static; align-self: flex-start; order: 10; } }
+  .qx .qx-contrib .qx-contrib-star { display: flex; align-items: center; flex-wrap: wrap; gap: var(--cds-gap-sm); }
   .qx-hero-bar i { display: block; width: 2.2rem; height: 0.3rem; border-radius: 0.2rem; background: var(--c); }
   .qx .qx-hero h1 { font-size: clamp(2.4rem, 6.5vw, 4.6rem); line-height: 1.02; letter-spacing: -0.02em; max-width: 14ch; }
   .qx-subtitle { margin: 0; color: var(--color-fg-muted); max-width: 46ch; font-size: clamp(1.1rem, 2.2vw, 1.4rem); line-height: 1.45; text-wrap: pretty; }
@@ -144,6 +155,8 @@
 <div class="qx">
   <header class="qx-head">
     <div class="qx-hero">
+      <a class="qx-star" href="https://github.com/rothgar/personal-ai-hardware" target="_blank" rel="noopener"
+        aria-label="Star personal-ai-hardware on GitHub"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg><span>Star on GitHub</span><b class="qx-star-count" hidden></b></a>
       <div class="qx-hero-bar" aria-hidden="true"><i style="--c: #7447d6"></i><i style="--c: #b0389a"></i><i style="--c: #2f8a12"></i><i style="--c: #00806f"></i><i style="--c: #e0582e"></i></div>
       <h1>Best Personal AI Hardware</h1>
       <p class="qx-subtitle">
@@ -317,6 +330,8 @@
   <section class="qx-section" id="contribute">
     <h2>Add your hardware</h2>
     <div class="qx-card qx-contrib">
+      <p class="qx-contrib-star"><a class="qx-star" href="https://github.com/rothgar/personal-ai-hardware" target="_blank" rel="noopener"
+        aria-label="Star personal-ai-hardware on GitHub"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg><span>Star on GitHub</span><b class="qx-star-count" hidden></b></a> Starring the repo helps more people find it.</p>
       <p class="qx-contrib-lede">Have a machine that isn't here? Run the same tests on it and your results show up on this page next to
       everything else, with the same charts, filters and budget.</p>
       <div class="qx-contrib-grid">
@@ -622,6 +637,15 @@
 </script>
 
 <script>
+  // GitHub star count for the star buttons; the buttons work without it
+  fetch('https://api.github.com/repos/rothgar/personal-ai-hardware', { headers: { Accept: 'application/vnd.github+json' } })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((repo) => {
+      if (!repo || typeof repo.stargazers_count !== 'number' || repo.stargazers_count < 1) return;   // no "0" next to the button
+      document.querySelectorAll('.qx-star-count').forEach((b) => { b.textContent = d3.format(',')(repo.stargazers_count); b.hidden = false; });
+      document.querySelectorAll('.qx-star').forEach((a) => a.setAttribute('aria-label', `Star personal-ai-hardware on GitHub (${repo.stargazers_count} stars)`));
+    })
+    .catch(() => { /* offline or rate limited: the buttons still link to the repo */ });
   // legend and the users toggle
   const legend = document.getElementById('legend');
   for (const a of QB.ARCH) {
