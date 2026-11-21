@@ -76,6 +76,22 @@
   .qx-inline-seg button[aria-pressed="true"] { background: var(--color-fg); color: var(--color-panel); font-weight: var(--cds-font-weight-medium); }
   .qx-inline-seg button:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 1px; }
   .qx-card ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: var(--cds-gap-xs); }
+  /* Add your hardware */
+  .qx-contrib { gap: var(--cds-gap-lg); }
+  .qx .qx-contrib .qx-contrib-lede { font-size: 1.1rem; color: var(--color-fg); max-width: 70ch; }
+  .qx-contrib-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: var(--cds-gap-lg) 2.5rem; }
+  .qx-contrib-grid > div { display: flex; flex-direction: column; gap: var(--cds-gap-sm); }
+  .qx-contrib ol { margin: 0; padding-left: 1.3rem; display: flex; flex-direction: column; gap: var(--cds-gap-xs); }
+  .qx-contrib li b { color: var(--color-fg); font-weight: 600; }
+  .qx-contrib code { font-size: 0.9em; background: var(--color-bg); border: 1px solid var(--color-border-line); border-radius: 4px; padding: 0 0.3em; }
+  .qx-contrib a { color: var(--color-fg); }
+  .qx .qx-contrib .qx-wanted { list-style: none; padding: 0; flex-direction: row; flex-wrap: wrap; gap: var(--cds-gap-sm); }
+  .qx-wanted li { display: flex; flex-direction: column; padding: 0.55rem 0.9rem; border: 1px solid var(--color-border-line);
+    border-radius: 10px; background: var(--color-bg); min-width: 11rem; }
+  .qx-wanted li a { font-weight: 600; text-decoration: none; }
+  .qx-wanted li a::after { content: " ↗"; color: var(--color-fg-muted); font-weight: 400; }
+  .qx-wanted li:hover { border-color: var(--color-fg-muted); }
+  .qx-wanted li span { font-size: 0.85rem; color: var(--color-fg-muted); }
   .qx-card-top { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); align-items: center; justify-content: space-between; }
   .qx-select { font: inherit; font-size: var(--cds-font-size-body); color: var(--color-fg); background: var(--color-bg); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-xs) var(--cds-pad-sm); }
   .qx-chart { position: relative; min-height: 360px; }
@@ -148,6 +164,7 @@
     <a href="#long-prompts">Long prompts</a>
     <a href="#quality">Model quality</a>
     <a href="#notes">Reading these results</a>
+    <a href="#contribute">Add your hardware</a>
   </nav>
 
   <div class="qx-bar">
@@ -280,6 +297,49 @@
         <p>Models ranked by Intelligence Index, highest at the top (grey bar; * is an Artificial Analysis estimate). The dots show tokens per joule on each system with <span class="qx-users-label">16 users</span>; further right is cheaper to run. The best trade-offs sit near the top with dots far to the right.</p>
         <div class="qx-chart dash-skeleton" id="qe-chart" data-source="aa_index results"></div>
       </div>
+    </div>
+  </section>
+
+  <section class="qx-section" id="contribute">
+    <h2>Add your hardware</h2>
+    <div class="qx-card qx-contrib">
+      <p class="qx-contrib-lede">Have a machine that isn't here? Run the same tests on it and your results show up on this page next to
+      everything else, with the same charts, filters and budget.</p>
+      <div class="qx-contrib-grid">
+        <div>
+          <h3>What you need</h3>
+          <ul>
+            <li><b>The machine</b>, on wall power, with nothing else heavy running. Linux with Docker for NVIDIA and AMD
+              GPUs; macOS for Apple silicon.</li>
+            <li><b>A Shelly Gen2 or newer smart plug</b> between the machine and the wall, such as the
+              <a href="https://us.shelly.com/products/shelly-plug-us-gen4-white">Plug US Gen4</a> (US, 15 A) or the
+              <a href="https://www.shelly.com/blogs/documentation/shelly-plug-s-mtr-gen3">Plug S MTR Gen3</a> (EU). The
+              harness reads it once a second over the local network. Optional, but without it there's no tokens per joule
+              or running cost.</li>
+            <li><a href="https://docs.astral.sh/uv/">uv</a> and a clone of
+              <a href="https://github.com/rothgar/qb2-vs-spark">the repo</a>.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>How</h3>
+          <ol>
+            <li>Describe the machine in <code>bench.yaml</code>: its name, price and whether it's a complete system or a card.</li>
+            <li>Run <code>./bench.py run &lt;machine&gt; -w power</code> for a few models, then the full set if you have time.</li>
+            <li>Send the <code>results/</code> folder in a pull request.</li>
+          </ol>
+          <p><a href="https://github.com/rothgar/qb2-vs-spark/blob/main/CONTRIBUTING.md">The step-by-step guide</a> covers
+          Macs, NVIDIA and AMD GPUs, and Tenstorrent cards.</p>
+        </div>
+      </div>
+      <h3>Wanted</h3>
+      <ul class="qx-wanted">
+        <li><a href="https://github.com/rothgar/qb2-vs-spark/issues/5">Mac Studio</a> <span>M4 Max or M3 Ultra</span></li>
+        <li><a href="https://github.com/rothgar/qb2-vs-spark/issues/1">Any Apple silicon Mac</a> <span>an M5 Mac mini especially</span></li>
+        <li><a href="https://github.com/rothgar/qb2-vs-spark/issues/6">GeForce RTX 5090</a> <span>32 GB Blackwell</span></li>
+        <li><a href="https://github.com/rothgar/qb2-vs-spark/issues/7">RTX PRO 6000 Blackwell</a> <span>96 GB</span></li>
+        <li><a href="https://github.com/rothgar/qb2-vs-spark/issues/2">More Ryzen AI Max+ 395 machines</a> <span>Strix Halo</span></li>
+        <li><a href="https://github.com/rothgar/qb2-vs-spark/issues/new">Something else?</a> <span>open an issue</span></li>
+      </ul>
     </div>
   </section>
 
