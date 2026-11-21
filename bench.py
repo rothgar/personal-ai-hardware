@@ -653,7 +653,7 @@ def cmd_report(cfg: dict, a: argparse.Namespace) -> int:
 
 # ---------------------------------------------------------------------------------------------------- site
 
-SITE_URL = "https://rothgar.github.io/qb2-vs-spark/"   # where docs/ is published (GitHub Pages)
+SITE_URL = "https://rothgar.github.io/personal-ai-hardware/"   # where docs/ is published (GitHub Pages)
 SITE_RESULTS, SITE_QUALITY, SITE_TALOS, SITE_IMAGES, SITE_VIDEOS = "results.csv", "quality.csv", "talos.csv", "images.csv", "videos.csv"
 
 

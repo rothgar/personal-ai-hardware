@@ -107,7 +107,7 @@ ROCm container. `gpu: rocm` gives the container the AMD GPU devices (`/dev/kfd`,
 4. Run it like any other machine: `./bench.py run <id> -m gpt-oss-20b --dry-run`, then `-w power`, then everything.
 
 The Spark's Nemotron build is NVFP4 and needs an NVIDIA GPU, so expect that one to fail. Which image you used, and
-which models loaded, are worth reporting in [issue #2](https://github.com/rothgar/qb2-vs-spark/issues/2) even before
+which models loaded, are worth reporting in [issue #2](https://github.com/rothgar/personal-ai-hardware/issues/2) even before
 you have results.
 
 ## Run the tests on an NVIDIA card (RTX 5090, RTX PRO 6000 and others)

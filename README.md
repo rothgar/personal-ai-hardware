@@ -1,9 +1,9 @@
-# QuietBox 2 vs DGX Spark
+# Best Personal AI Hardware
 
 Speed, wall-power efficiency and running cost for open-weight models on personal AI hardware:
 a Tenstorrent QuietBox 2, one and two NVIDIA DGX Sparks, and any machine you add.
 
-**Results:** https://rothgar.github.io/qb2-vs-spark/
+**Results:** https://rothgar.github.io/personal-ai-hardware/
 
 Every number on the page is measured with the harness in this repo, except the quality scores, which are the
 published [Artificial Analysis Intelligence Index](https://artificialanalysis.ai).
@@ -110,5 +110,5 @@ sampled, and `meta.json` with the software and hardware versions. Server logs st
 
 Have an M5 Mac mini, a single Tenstorrent card, or something else? See [CONTRIBUTING.md](CONTRIBUTING.md) for how
 much memory each model needs on a Mac, how to add a machine, and how to send results in a pull request. Mac results
-are especially wanted: see [issue #1](https://github.com/rothgar/qb2-vs-spark/issues/1), and for AMD Strix Halo
-[issue #2](https://github.com/rothgar/qb2-vs-spark/issues/2).
+are especially wanted: see [issue #1](https://github.com/rothgar/personal-ai-hardware/issues/1), and for AMD Strix Halo
+[issue #2](https://github.com/rothgar/personal-ai-hardware/issues/2).
