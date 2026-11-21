@@ -6,6 +6,16 @@
   .qx h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; text-wrap: balance; }
   .qx-lede { margin: 0; color: var(--color-fg-muted); max-width: 64ch; font-size: var(--cds-font-size-heading); line-height: 1.5; }
   .qx .qx-lede b { font-weight: 600; color: var(--color-fg); font-variant-numeric: tabular-nums; }
+  /* the two picks: side-by-side cards tinted with the manufacturer's color, stacked on narrow screens */
+  .qx-picks { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); margin-bottom: var(--cds-gap-sm); }
+  .qx .qx-picks .qx-verdict { flex: 1 1 22rem; max-width: none; position: relative; overflow: hidden; margin: 0;
+    padding: 1.25rem 1.4rem 1.3rem 1.65rem; border: 1px solid color-mix(in srgb, var(--c) 30%, var(--color-border-line));
+    border-radius: 14px; background:
+      radial-gradient(80% 120% at 100% 0%, color-mix(in srgb, var(--c) 16%, transparent), transparent 70%),
+      color-mix(in srgb, var(--c) 6%, var(--color-panel)); }
+  .qx .qx-picks .qx-verdict::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--c); }
+  .qx-pick-who { display: block; margin-bottom: 0.35rem; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: color-mix(in srgb, var(--c) 70%, var(--color-fg)); }
   .qx .qx-verdict strong { display: block; font-family: var(--font-anthropic-serif); font-weight: 400; color: var(--color-fg);
     font-size: 1.45em; line-height: 1.25; margin-bottom: 0.25rem; text-wrap: balance; }
   /* hero: the title and subtitle in a panel with the manufacturers' colors (the same as the sharing card) */
@@ -140,16 +150,20 @@
         Power efficiency and speed of open-weight models on personal AI machines, measured at the wall.
       </p>
     </div>
-    <p class="qx-lede qx-verdict">
-      <strong>For one person, buy a DGX Spark and run Qwen3.6 35B A3B.</strong>
-      <span data-source="verdict" data-field="one_first_cap">The most efficient</span> of the smarter models we tested,
-      on about <b class="dash-skeleton" data-source="verdict" data-field="one_w">—</b> watts.
-    </p>
-    <p class="qx-lede qx-verdict">
-      <strong>For a team of coding agents with long prompts, buy a QuietBox 2 and run Qwen3.8 27B.</strong>
-      Each agent gets <b class="dash-skeleton" data-source="verdict" data-field="ag_tps">—</b> tokens a second and the
-      quickest first token of any build.
-    </p>
+    <div class="qx-picks">
+      <p class="qx-lede qx-verdict" style="--c: #2f8a12">
+        <span class="qx-pick-who">For one person</span>
+        <strong>Buy a DGX Spark and run Qwen3.6 35B A3B.</strong>
+        <span data-source="verdict" data-field="one_first_cap">The most efficient</span> of the smarter models we tested,
+        on about <b class="dash-skeleton" data-source="verdict" data-field="one_w">—</b> watts.
+      </p>
+      <p class="qx-lede qx-verdict" style="--c: #7447d6">
+        <span class="qx-pick-who">For a team of coding agents with long prompts</span>
+        <strong>Buy a QuietBox 2 and run Qwen3.8 27B.</strong>
+        Each agent gets <b class="dash-skeleton" data-source="verdict" data-field="ag_tps">—</b> tokens a second and the
+        quickest first token of any build.
+      </p>
+    </div>
     <p class="qx-links">
       <a href="talos.html">Talos Linux vs Ubuntu</a>
       <a href="images.html">Image generation</a>
