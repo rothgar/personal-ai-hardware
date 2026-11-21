@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tokens per Joule</title>
-<meta name="description" content="Output tokens per joule of wall power for open-weight models on Tenstorrent, NVIDIA, Apple and AMD hardware, with speed, running cost and published quality scores.">
+<title>Best Personal AI Hardware</title>
+<meta name="description" content="Power efficiency and speed of open-weight models on Tenstorrent, NVIDIA, Apple and AMD hardware, measured at the wall, with running cost and published quality scores.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
@@ -142,7 +142,7 @@
   .qx .qx-lede b { font-weight: 600; color: var(--color-fg); font-variant-numeric: tabular-nums; }
   .qx .qx-verdict strong { display: block; font-family: var(--font-anthropic-serif); font-weight: 400; color: var(--color-fg);
     font-size: 1.45em; line-height: 1.25; margin-bottom: 0.25rem; text-wrap: balance; }
-  .qx-method { margin: 0; color: var(--color-fg-muted); max-width: 72ch; font-size: 0.95rem; line-height: 1.5; }
+  .qx-subtitle { margin: -0.25rem 0 0.25rem; color: var(--color-fg-muted); max-width: 64ch; font-size: 1.05rem; line-height: 1.5; }
   .qx-bar { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); align-items: center; justify-content: space-between; }
   .qx-seg { display: inline-flex; flex-wrap: wrap; max-width: 100%; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); overflow: hidden; }
   .qx-seg button { font: inherit; font-size: var(--cds-font-size-body); padding: var(--cds-pad-sm) var(--cds-pad-lg); background: transparent; color: var(--color-fg-muted); border: 0; cursor: pointer; }
@@ -211,31 +211,21 @@
 
 <div class="qx">
   <header class="qx-head">
-    <h1>Tokens per Joule</h1>
+    <h1>Best Personal AI Hardware</h1>
+    <p class="qx-subtitle">
+      Power efficiency and speed of open-weight models on
+      <span data-source="headline" data-field="families" data-where="users=16">Tenstorrent and NVIDIA</span> machines,
+      measured at the wall.
+    </p>
     <p class="qx-lede qx-verdict">
       <strong>For one person, buy a DGX Spark and run Qwen3.6 35B A3B.</strong>
-      It scores <b class="dash-skeleton" data-source="verdict" data-field="one_aa">—</b> on the Artificial Analysis
-      Intelligence Index and writes <b class="dash-skeleton" data-source="verdict" data-field="one_tps">—</b> tokens a
-      second at <b class="dash-skeleton" data-source="verdict" data-field="one_tpj">—</b> tokens per joule on about
-      <b class="dash-skeleton" data-source="verdict" data-field="one_w">—</b> watts:
-      <span data-source="verdict" data-field="one_first">the most efficient</span> of every model here scoring 15 or more.
+      <span data-source="verdict" data-field="one_first_cap">The most efficient</span> of the smarter models we tested,
+      on about <b class="dash-skeleton" data-source="verdict" data-field="one_w">—</b> watts.
     </p>
     <p class="qx-lede qx-verdict">
       <strong>For a team of coding agents with long prompts, buy a QuietBox 2 and run Qwen3.8 27B.</strong>
-      With four agents each sending 8K-token prompts, every agent gets
-      <b class="dash-skeleton" data-source="verdict" data-field="ag_tps">—</b> tokens a second and its first token in
-      <b class="dash-skeleton" data-source="verdict" data-field="ag_ttft">—</b> s
-      (<span data-source="verdict" data-field="ag_first">sooner than any other build here</span>). Together they get
-      <b class="dash-skeleton" data-source="verdict" data-field="ag_total">—</b> tokens a second,
-      <b class="dash-skeleton" data-source="verdict" data-field="ag_more">—</b>×
-      <span data-source="verdict" data-field="ag_total_best">the next best build</span>, at about
-      <b class="dash-skeleton" data-source="verdict" data-field="ag_w">—</b> watts.
-    </p>
-    <p class="qx-method">
-      Open-weight models on <span data-source="headline" data-field="families" data-where="users=16">Tenstorrent and NVIDIA</span>
-      hardware, every machine running the same prompts under the same load, with a smart plug measuring the whole box
-      at the wall. The Qwen3.8 build serves up to 8 users with a DFlash2 draft model and has no Intelligence Index
-      score yet.
+      Each agent gets <b class="dash-skeleton" data-source="verdict" data-field="ag_tps">—</b> tokens a second and the
+      quickest first token of any build.
     </p>
     <p class="qx-links">
       <a href="talos.html">Talos Linux vs Ubuntu</a>
@@ -592,6 +582,7 @@
         one_w: one?.wall_w ? Math.round(one.wall_w) : null,
         one_aa: score['qwen3.6-35b-a3b'] ?? null,
         one_first: one && capable[0] === one ? 'the most efficient' : 'one of the most efficient',
+        one_first_cap: one && capable[0] === one ? 'The most efficient' : 'One of the most efficient',
         ag_tps: ag ? Math.round(ag.decode_tok_s_user) : null,
         ag_ttft: ag ? (ag.ttft_ms / 1000).toFixed(1) : null,
         ag_total: ag ? Math.round(ag.total_tok_s) : null,
