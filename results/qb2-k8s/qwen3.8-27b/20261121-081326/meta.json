@@ -1,0 +1,162 @@
+{
+  "machine": "qb2-wrtk8s",
+  "hardware": "Tenstorrent QuietBox 2 (2x p300c, 4x Blackhole), Talos + Kubernetes",
+  "model": "qwen3.8-27b-qb2-dflash",
+  "hf_id": "Qwen/Qwen3.8-27B",
+  "params": "27.8B dense",
+  "serve": {
+    "spec": "qwen3.8-27b-qb2-dflash",
+    "serve": "Qwen/Qwen3.8-27B"
+  },
+  "started": "20261121-081326",
+  "environment": {
+    "node": {
+      "osImage": "Talos Enterprise (v1.14.5)",
+      "kernelVersion": "6.18.58-talos",
+      "kubeletVersion": "v1.37.2",
+      "containerRuntimeVersion": "containerd://2.3.7"
+    },
+    "talos_extensions": {
+      "amd-ucode": "20260916",
+      "iscsi-tools": "v0.2.0",
+      "modules.dep": "6.18.58-talos",
+      "tenstorrent": "2.11.0"
+    },
+    "helm": {
+      "amd-gpu-dra-driver": "k8s-gpu-dra-driver-v1.0.1",
+      "arc-controller": "gha-runner-scale-set-controller-0.15.1",
+      "cert-manager": "cert-manager-v1.21.3",
+      "cloudnative-pg": "cloudnative-pg-0.29.2",
+      "csi-driver-nfs": "csi-driver-nfs-4.13.6",
+      "descheduler": "descheduler-0.37.0",
+      "external-dns": "external-dns-1.24.0",
+      "external-secrets": "external-secrets-2.15.0",
+      "frigate": "frigate-7.8.0",
+      "gpu-operator": "gpu-operator-v26.7.3",
+      "headlamp": "headlamp-0.46.0",
+      "hermes-agent-operator": "hermes-agent-operator-0.5.5",
+      "home-assistant": "home-assistant-0.3.92",
+      "immich": "immich-0.12.0",
+      "keda": "keda-2.21.1",
+      "keda-add-ons-http": "keda-add-ons-http-0.16.0",
+      "kepler": "kepler-0.13.0",
+      "kube-prometheus-stack": "kube-prometheus-stack-93.6.1",
+      "kubelet-csr-approver": "kubelet-csr-approver-1.2.16",
+      "local-path-provisioner": "local-path-provisioner-0.0.37",
+      "lws": "lws-v1.0.0",
+      "mecak8s": "mecak8s-0.0.49",
+      "metallb": "metallb-0.16.2",
+      "metrics-server": "metrics-server-3.14.0",
+      "nvidia-device-plugin": "nvidia-device-plugin-0.20.2",
+      "nvidia-dra-driver-gpu": "dra-driver-nvidia-gpu-0.5.1",
+      "omni": "omni-2.13.3",
+      "onedev": "onedev-17.2.2",
+      "pulsys": "pulsys-0.1.6",
+      "reloader": "reloader-2.2.20",
+      "tailscale-operator": "tailscale-operator-1.104.7",
+      "traefik": "traefik-42.3.0",
+      "tt-operator": "tt-operator-0.3.0",
+      "wrtk8s-amd64": "gha-runner-scale-set-0.15.1",
+      "wrtk8s-arm64": "gha-runner-scale-set-0.15.1"
+    },
+    "daemonsets": {
+      "amd-gpu-dra-driver-k8s-gpu-dra-driver-kubeletplugin": true,
+      "csi-nfs-node": true,
+      "synology-csi-node": true,
+      "app-image-prepull": true,
+      "kepler": true,
+      "coral-edgetpu-device-plugin": true,
+      "dranet": true,
+      "generic-device-plugin-gaming": true,
+      "kube-flannel": true,
+      "kube-proxy": true,
+      "omni-kube-service-exposer": true,
+      "rpi-led-daemon": true,
+      "metallb-frr-k8s": true,
+      "metallb-speaker": true,
+      "kube-prometheus-stack-prometheus-node-exporter": true,
+      "nvidia-gpu-exporter": true,
+      "dra-driver-nvidia-gpu-kubelet-plugin": true,
+      "gpu-feature-discovery": true,
+      "gpu-operator-node-feature-discovery-worker": true,
+      "nvidia-device-plugin": true,
+      "nvidia-device-plugin-gpu-feature-discovery": true,
+      "nvidia-device-plugin-node-feature-discovery-worker": true,
+      "nvidia-mig-manager": false,
+      "nvidia-operator-validator": true,
+      "hugepages-1g": true,
+      "tt-fabric-manager-agent": true,
+      "tt-operator-tt-dra-driver-kubeletplugin": true,
+      "tt-telemetry-daemonset": true
+    },
+    "device_info": {
+      "host": {
+        "OS": "Linux",
+        "Distro": "Debian GNU/Linux 13 (trixie)",
+        "Kernel": "6.18.58-talos",
+        "Platform": "x86_64",
+        "Python": "3.12.15",
+        "Memory": "249.30 GB",
+        "Driver": "TT-KMD 2.10.0"
+      },
+      "devices": [
+        {
+          "board_type": "p300c",
+          "bus_id": "0000:01:00.0",
+          "firmware": {
+            "fw_bundle_version": "19.15.0.0",
+            "tt_flash_version": "N/A",
+            "cm_fw": "0.37.0.0",
+            "cm_fw_date": "2020-00-37",
+            "eth_fw": "1.12.2",
+            "dm_bl_fw": "0.0.0.0",
+            "dm_app_fw": "0.31.0.0",
+            "gddr_fw": "2.16"
+          }
+        },
+        {
+          "board_type": "p300c",
+          "bus_id": "0000:02:00.0",
+          "firmware": {
+            "fw_bundle_version": "19.15.0.0",
+            "tt_flash_version": "N/A",
+            "cm_fw": "0.37.0.0",
+            "cm_fw_date": "2020-00-37",
+            "eth_fw": "1.12.2",
+            "dm_bl_fw": "0.0.0.0",
+            "dm_app_fw": "0.31.0.0",
+            "gddr_fw": "2.16"
+          }
+        },
+        {
+          "board_type": "p300c",
+          "bus_id": "0000:03:00.0",
+          "firmware": {
+            "fw_bundle_version": "19.15.0.0",
+            "tt_flash_version": "N/A",
+            "cm_fw": "0.37.0.0",
+            "cm_fw_date": "2020-00-37",
+            "eth_fw": "1.12.2",
+            "dm_bl_fw": "0.0.0.0",
+            "dm_app_fw": "0.31.0.0",
+            "gddr_fw": "2.16"
+          }
+        },
+        {
+          "board_type": "p300c",
+          "bus_id": "0000:04:00.0",
+          "firmware": {
+            "fw_bundle_version": "19.15.0.0",
+            "tt_flash_version": "N/A",
+            "cm_fw": "0.37.0.0",
+            "cm_fw_date": "2020-00-37",
+            "eth_fw": "1.12.2",
+            "dm_bl_fw": "0.0.0.0",
+            "dm_app_fw": "0.31.0.0",
+            "gddr_fw": "2.16"
+          }
+        }
+      ]
+    }
+  }
+}

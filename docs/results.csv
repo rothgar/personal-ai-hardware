@@ -897,47 +897,48 @@ QuietBox 2 (4-chip build),Tenstorrent,qwen3.6-35b-a3b,MoE,BF16,35,3,agent-64k,65
 QuietBox 2 (4-chip build),Tenstorrent,qwen3.6-35b-a3b,MoE,BF16,35,3,agent-128k,130816,256,1,71.69,7.58,30208.9,33765.9,0.0296,923.1,0.008
 QuietBox 2 (4-chip build),Tenstorrent,qwen3.6-35b-a3b,MoE,BF16,35,3,ctx-128k,130816,256,1,68.33,7.56,30123.2,33855.2,0.0295,915.0,0.008
 QuietBox 2 (4-chip build),Tenstorrent,qwen3.6-35b-a3b,MoE,BF16,35,3,agent-128k,130816,256,4,15.3,7.93,112424.4,129086.9,0.031,931.4,0.009
-"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,chat,128,256,1,134.12,129.07,81.9,1983.2,0.5042,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,chat,128,256,1,134.02,128.56,88.3,1991.0,0.5022,899.7,0.143
 DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,chat,128,256,1,4.67,4.66,291.8,54896.2,0.0182,127.7,0.037
 2x DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,chat,128,256,1,8.79,8.75,239.5,29245.0,0.0342,257.8,0.034
-"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,chat,128,256,4,109.39,321.22,269.6,2600.7,1.2548,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,chat,128,256,4,109.03,324.63,226.3,2565.0,1.2681,881.0,0.368
 DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,chat,128,256,4,4.38,17.38,622.4,58905.7,0.0679,120.4,0.144
 2x DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,chat,128,256,4,8.27,32.52,624.8,31474.2,0.127,247.7,0.131
-"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,users,1024,256,1,130.58,122.17,142.3,2095.2,0.4772,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,users,1024,256,1,130.77,122.75,135.4,2085.4,0.4795,874.8,0.14
 DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,users,1024,256,1,4.65,4.59,925.6,55716.2,0.0179,130.4,0.035
 2x DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,users,1024,256,1,8.75,8.6,635.7,29780.1,0.0336,266.6,0.032
-"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,users,1024,256,2,152.37,248.41,214.2,1887.8,0.9704,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,users,1024,256,2,151.88,247.14,219.9,1898.8,0.9654,854.1,0.289
 DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,users,1024,256,2,4.43,8.65,1652.5,59171.0,0.0338,119.0,0.073
 2x DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,users,1024,256,2,8.4,16.33,974.8,31316.0,0.0638,246.9,0.066
-"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,users,1024,256,4,126.76,422.4,303.5,2315.1,1.65,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,users,1024,256,4,126.63,422.12,302.1,2315.9,1.6489,880.3,0.48
 DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,users,1024,256,4,4.35,16.6,3040.5,61628.0,0.0648,120.7,0.137
 2x DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,users,1024,256,4,8.13,30.94,1685.5,33052.0,0.1208,249.6,0.124
-"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,users,1024,256,8,73.26,399.05,655.8,4136.4,1.5588,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,users,1024,256,8,72.19,399.41,592.6,4125.2,1.5602,947.7,0.421
 DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,users,1024,256,8,4.13,30.91,4286.8,66050.6,0.1208,128.4,0.241
 2x DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,users,1024,256,8,7.48,55.9,2425.5,36526.2,0.2184,259.4,0.215
 DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,users,1024,256,16,3.66,53.85,5907.8,75674.8,0.2104,139.5,0.386
 2x DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,users,1024,256,16,6.58,96.7,3415.3,42149.6,0.3777,276.7,0.349
 DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,users,1024,256,32,2.86,83.09,8459.8,97728.1,0.3246,151.4,0.549
 2x DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,users,1024,256,32,5.02,145.67,4935.8,55765.3,0.569,300.0,0.486
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,power,1024,512,1,211.63,200.0,145.1,2559.7,0.3906,901.9,0.222
 DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,power,1024,512,1,4.65,4.62,922.8,110726.7,0.009,130.0,0.036
 2x DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,power,1024,512,1,8.76,8.68,634.8,58993.6,0.017,267.8,0.032
 DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,power,1024,512,16,3.82,58.19,6558.9,140214.6,0.1136,132.3,0.44
 2x DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,power,1024,512,16,6.94,105.35,3803.7,77442.1,0.2058,269.0,0.392
 DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,power,1024,512,32,3.13,93.61,10200.7,173719.7,0.1828,140.3,0.667
 2x DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,power,1024,512,32,5.54,165.69,5963.7,98172.1,0.3236,287.1,0.577
-"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,codegen,1024,1024,1,127.74,125.64,141.8,8150.1,0.1227,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,codegen,1024,1024,1,127.8,125.68,142.6,8147.4,0.1227,918.8,0.137
 DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,codegen,1024,1024,1,4.65,4.64,927.3,220829.8,0.0045,133.6,0.035
 2x DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,codegen,1024,1024,1,8.75,8.71,624.5,117574.7,0.0085,277.3,0.031
-"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,codegen,1024,1024,4,104.66,317.68,369.0,10143.8,0.3102,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,codegen,1024,1024,4,104.98,319.81,315.2,10060.0,0.3123,932.8,0.343
 DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,codegen,1024,1024,4,4.35,17.18,3061.3,238364.4,0.0168,119.7,0.144
 2x DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,codegen,1024,1024,4,8.19,32.35,1689.3,126571.9,0.0316,253.2,0.128
-"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,agent-turn,8192,512,1,227.34,163.45,884.4,3132.2,0.3192,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,agent-turn,8192,512,1,227.91,164.19,876.1,3118.2,0.3207,953.8,0.172
 DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,agent-turn,8192,512,1,4.61,4.36,6592.7,117481.4,0.0085,133.6,0.033
 2x DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,agent-turn,8192,512,1,8.68,8.13,4128.0,63002.9,0.0159,,
-"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,agent-turn,8192,512,4,108.67,312.58,1612.5,6314.6,0.6105,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,agent-turn,8192,512,4,113.31,324.37,1566.3,6076.0,0.6335,1069.4,0.303
 DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,agent-turn,8192,512,4,3.84,14.1,11710.7,144873.8,0.0275,135.9,0.104
 2x DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,agent-turn,8192,512,4,7.13,25.94,7047.9,78722.5,0.0507,275.7,0.094
-"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,agent-long,32768,256,1,121.52,47.54,3286.5,5384.8,0.1857,,
+"QuietBox 2 (DFlash2 speculative, Talos)",Tenstorrent,qwen3.8-27b,Dense,BFP4/BFP8,27.8,27.8,agent-long,32768,256,1,121.47,47.75,3261.9,5361.3,0.1865,1107.5,0.043
 DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,agent-long,32768,256,1,4.47,3.0,28176.0,85253.3,0.0117,155.5,0.019
 2x DGX Spark (Talos),NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,agent-long,32768,256,1,8.43,5.41,17052.0,47306.3,0.0211,310.1,0.017
 "DGX Spark (MTP speculative, Talos)",NVIDIA,qwen3.8-27b,Dense,BF16,27.8,27.8,chat,128,256,1,10.67,10.53,427.0,24321.9,0.0411,114.0,0.092
