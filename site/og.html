@@ -1,47 +1,32 @@
 <!doctype html>
-<!-- The social sharing card (docs/og.png, 1200x630). Render with tools/make-og.sh after changing the picks. -->
+<!-- The social sharing card (docs/og.png, 1200x630): the page title and the systems' legend colors.
+     Render with tools/make-og.sh after changing it. Colors match SYS_HEX in shell.html. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
 <style>
-  :root { --bg: #12151a; --panel: #1b1f26; --fg: #e8eaee; --muted: #a3a9b5; --line: #2c323c;
-          --nvidia: #2f8a12; --tt: #7447d6; --amd: #e0582e; --tt2: #b0389a; --nv2: #00806f; }
   * { box-sizing: border-box; }
   html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
-  body { background: var(--bg); color: var(--fg); font-family: "IBM Plex Sans", system-ui, sans-serif;
-         padding: 64px 72px 56px; display: flex; flex-direction: column; }
-  .bar { display: flex; gap: 8px; margin-bottom: 28px; }
-  .bar i { width: 40px; height: 6px; border-radius: 3px; display: block; }
-  h1 { font-family: "Source Serif 4", Georgia, serif; font-weight: 400; font-size: 72px; line-height: 1.02; margin: 0; letter-spacing: -0.5px; }
-  .sub { color: var(--muted); font-size: 27px; margin: 16px 0 0; line-height: 1.35; max-width: 980px; }
-  .picks { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: auto; }
-  .pick { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 24px 28px 26px; position: relative; overflow: hidden; }
-  .pick::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--c); }
-  .who { color: var(--muted); font-size: 20px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; }
-  .what { font-family: "Source Serif 4", Georgia, serif; font-size: 34px; line-height: 1.15; margin-top: 8px; }
-  .what span { color: var(--muted); }
-  .num { margin-top: 14px; font-size: 22px; color: var(--muted); }
-  .num b { color: var(--fg); font-weight: 600; font-size: 28px; }
-  .foot { display: flex; justify-content: space-between; color: var(--muted); font-size: 20px; margin-top: 26px; }
+  body { background: #12151a; color: #e8eaee; font-family: "IBM Plex Sans", system-ui, sans-serif;
+         padding: 0 96px; display: flex; flex-direction: column; justify-content: center; gap: 56px; }
+  h1 { font-family: "Source Serif 4", Georgia, serif; font-weight: 400; font-size: 112px; line-height: 1.0; margin: 0; letter-spacing: -1px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 16px 18px; max-width: 1010px; }
+  .chip { display: inline-flex; align-items: center; gap: 12px; padding: 12px 22px 12px 18px; border-radius: 999px;
+          background: #1b1f26; border: 1px solid #2c323c; font-size: 28px; color: #c9ced8; }
+  .chip i { width: 22px; height: 22px; border-radius: 50%; background: var(--c); display: block; }
+  .chip.hollow i { background: transparent; box-shadow: inset 0 0 0 4px var(--c); }
 </style>
 </head>
 <body>
-  <div class="bar"><i style="background: var(--tt)"></i><i style="background: var(--tt2)"></i><i style="background: var(--nvidia)"></i><i style="background: var(--nv2)"></i><i style="background: var(--amd)"></i></div>
-  <h1>Best Personal AI Hardware</h1>
-  <p class="sub">Power efficiency and speed of open-weight models on personal AI machines, measured at the wall.</p>
-  <div class="picks">
-    <div class="pick" style="--c: var(--nvidia)">
-      <div class="who">For one person</div>
-      <div class="what">DGX Spark <span>+</span> Qwen3.6 35B A3B</div>
-      <div class="num">Most efficient smart model · <b>~115 W</b></div>
-    </div>
-    <div class="pick" style="--c: var(--tt)">
-      <div class="who">For a team of coding agents</div>
-      <div class="what">QuietBox 2 <span>+</span> Qwen3.8 27B</div>
-      <div class="num"><b>113</b> tokens/s per agent · fastest first token</div>
-    </div>
+  <h1>Best Personal<br>AI Hardware</h1>
+  <div class="chips">
+    <span class="chip" style="--c: #7447d6"><i></i>QuietBox 2</span>
+    <span class="chip" style="--c: #b0389a"><i></i>Tenstorrent p150</span>
+    <span class="chip" style="--c: #2f8a12"><i></i>DGX Spark</span>
+    <span class="chip hollow" style="--c: #93b81f"><i></i>DGX Spark (MTP)</span>
+    <span class="chip" style="--c: #00806f"><i></i>2x DGX Spark</span>
+    <span class="chip" style="--c: #e0582e"><i></i>Framework Desktop</span>
   </div>
-  <div class="foot"><span>Same prompts on every machine · whole-box power from a smart plug</span><span>rothgar.github.io/qb2-vs-spark</span></div>
 </body>
 </html>
