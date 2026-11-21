@@ -48,6 +48,14 @@
   .qx-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: flex; flex-direction: column; gap: var(--cds-gap-sm); min-width: 0; }
   .qx-card h3 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; font-size: calc(var(--cds-font-size-heading) * 1.15); }
   .qx-card p, .qx-card li { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-body); line-height: 1.5; max-width: 80ch; }
+  .qx-inline-seg { display: inline-flex; vertical-align: baseline; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius);
+    overflow: hidden; margin: 0 0.1em; line-height: 1.35; }
+  .qx-inline-seg button { font: inherit; font-variant-numeric: tabular-nums; padding: 0 0.55em; min-width: 2.2em; background: transparent;
+    color: var(--color-fg-muted); border: 0; cursor: pointer; }
+  .qx-inline-seg button + button { border-left: 1px solid var(--color-border-line); }
+  .qx-inline-seg button:hover { color: var(--color-fg); background: var(--color-bg); }
+  .qx-inline-seg button[aria-pressed="true"] { background: var(--color-fg); color: var(--color-panel); font-weight: var(--cds-font-weight-medium); }
+  .qx-inline-seg button:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 1px; }
   .qx-card ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: var(--cds-gap-xs); }
   .qx-card-top { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); align-items: center; justify-content: space-between; }
   .qx-select { font: inherit; font-size: var(--cds-font-size-body); color: var(--color-fg); background: var(--color-bg); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-xs) var(--cds-pad-sm); }
@@ -635,6 +643,29 @@
     const u = String(QB.users());
     seg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.users === u)));
     document.querySelectorAll('.qx-users-label').forEach((s) => { s.textContent = u === '1' ? '1 user' : `${u} users`; });
+    document.querySelectorAll('.qx-inline-seg button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.users === u)));
+  });
+  // in a card's text, "with 16 users" is buttons that set the same users filter as the bar above: "with [1|16|32] users"
+  const userCounts = [...seg.querySelectorAll('button[data-users]')].map((b) => b.dataset.users);
+  document.querySelectorAll('.qx-card .qx-users-label').forEach((span) => {
+    const group = document.createElement('span');
+    group.className = 'qx-inline-seg';
+    group.setAttribute('role', 'group');
+    group.setAttribute('aria-label', 'Users');
+    for (const n of userCounts) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.dataset.users = n;
+      b.textContent = n;
+      b.title = n === '1' ? 'Show 1 user' : `Show ${n} users`;
+      b.setAttribute('aria-pressed', String(n === String(QB.users())));
+      group.appendChild(b);
+    }
+    group.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-users]');
+      if (b) dash.setParams({ users: b.dataset.users });
+    });
+    span.replaceWith(group, ' users');
   });
 </script>
 
