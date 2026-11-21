@@ -10,6 +10,19 @@
     font-size: 1.45em; line-height: 1.25; margin-bottom: 0.25rem; text-wrap: balance; }
   .qx-subtitle { margin: -0.25rem 0 0.25rem; color: var(--color-fg-muted); max-width: 64ch; font-size: 1.05rem; line-height: 1.5; }
   .qx-bar { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); align-items: center; justify-content: space-between; }
+  .qx-budget { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: var(--cds-gap-sm) var(--cds-gap-lg);
+    margin: 0; padding: var(--cds-pad-sm, 0.5rem) var(--cds-pad-lg, 1rem); border: 1px solid var(--color-border-line);
+    border-radius: var(--cds-radius); background: var(--color-panel); font-size: var(--cds-font-size-body); }
+  .qx-budget legend { float: left; padding: 0; margin-right: var(--cds-gap-sm); font-weight: var(--cds-font-weight-medium); color: var(--color-fg); }
+  .qx-budget-range { display: inline-flex; align-items: center; gap: var(--cds-gap-sm); flex: 1 1 18rem; min-width: 0; }
+  .qx-budget-label { white-space: nowrap; color: var(--color-fg-muted); min-width: 9.5rem; }
+  .qx-budget-label b { color: var(--color-fg); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .qx-budget input[type="range"] { flex: 1 1 auto; min-width: 6rem; accent-color: var(--color-fg); }
+  .qx-check { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); white-space: nowrap; cursor: pointer; }
+  .qx-check input { accent-color: var(--color-fg); margin: 0; }
+  .qx-budget-note { flex-basis: 100%; color: var(--color-fg-muted); font-size: 0.85rem; }
+  .qx .qx-legend button.qx-out { opacity: 0.35; cursor: not-allowed; text-decoration: none; }
+  .qx .qx-legend button.qx-out i { filter: grayscale(1); }
   .qx-seg { display: inline-flex; flex-wrap: wrap; max-width: 100%; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); overflow: hidden; }
   .qx-seg button { font: inherit; font-size: var(--cds-font-size-body); padding: var(--cds-pad-sm) var(--cds-pad-lg); background: transparent; color: var(--color-fg-muted); border: 0; cursor: pointer; }
   /* a line on each button's left and top; the group's border clips the outer ones, so wrapped rows stay divided */
@@ -108,6 +121,16 @@
   </nav>
 
   <div class="qx-bar">
+    <fieldset class="qx-budget" id="budget">
+      <legend>Budget</legend>
+      <label class="qx-budget-range">
+        <span class="qx-budget-label">Up to <b id="budget-value">any price</b></span>
+        <input type="range" id="budget-range" min="0" max="0" step="1" value="0" aria-describedby="budget-note">
+      </label>
+      <label class="qx-check"><input type="checkbox" id="kind-system" checked> Complete systems</label>
+      <label class="qx-check"><input type="checkbox" id="kind-card" checked> Cards &amp; components</label>
+      <span class="qx-budget-note" id="budget-note">US list prices (MSRP), November 2026. Card prices don't include the computer around them.</span>
+    </fieldset>
     <div class="qx-legend" id="legend" aria-label="Systems and architectures"></div>
     <div class="qx-seg" role="group" aria-label="Users in the power test">
       <button type="button" data-users="1" aria-pressed="false">1 user</button>
@@ -270,8 +293,31 @@
         || rank(KNOWN, base(a)) - rank(KNOWN, base(b)) || base(a).localeCompare(base(b))
         || (a !== base(a)) - (b !== base(b)) || rank(KNOWN, a) - rank(KNOWN, b) || a.localeCompare(b));
     };
-    // systems hidden with the legend's toggles (the `hide` param, '|'-separated); every chart reads SYS() and rows()
-    const hidden = () => new Set((dash.params().hide || '').split('|').filter(Boolean));
+    // systems hidden with the legend's toggles (the `hide` param, '|'-separated)
+    const legendHidden = () => new Set((dash.params().hide || '').split('|').filter(Boolean));
+    // the budget filter: `budget` (max US$, absent = any) and `kinds` ('system', 'card', both by default). A system
+    // with no price in the data is never ruled out by price.
+    const priceOf = (s) => {
+      const d = dash.data('results'), r = d.status === 'ok' ? d.data.find((x) => x.system === s) : null;
+      return { price: r && r.price_usd !== '' ? +r.price_usd : null, kind: r?.kind || '' };
+    };
+    const budget = () => {
+      const p = dash.params(), kinds = (p.kinds ?? 'system|card').split('|').filter(Boolean);
+      return { max: p.budget != null && p.budget !== '' ? +p.budget : null, kinds };
+    };
+    // why a system is outside the budget filter, or '' when it's in
+    const excludedWhy = (s) => {
+      const { price, kind } = priceOf(s), b = budget();
+      if (kind && !b.kinds.includes(kind)) return kind === 'card' ? 'cards and components are off' : 'complete systems are off';
+      if (b.max != null && price != null && price > b.max) return `$${d3.format(',')(price)}, over the budget`;
+      return '';
+    };
+    // every chart reads SYS() and rows(), so both filters reach all of them
+    const hidden = () => {
+      const h = legendHidden();
+      for (const s of ALL()) if (excludedWhy(s)) h.add(s);
+      return h;
+    };
     const SYS = () => { const h = hidden(); return ALL().filter((s) => !h.has(s)); };
     // a build of a system ("DGX Spark (MTP speculative, Talos)", "QuietBox 2 (4-chip build)") is drawn as an outline
     // (dashed in line charts) in its own shade, so it reads apart from the solid base system by fill, not just shade
@@ -366,7 +412,7 @@
       return false;
     }
     const strip = (sel) => sel.attr('font-size', null).attr('font-family', null);
-    return { SYS, ALL, hidden, familyOf, ARCH, color, hollow, paint, rows, symbol, fmtJ, fmt1, fmt0, fmtP, size, users, logTicks, thin, tip, begin, strip };
+    return { SYS, ALL, hidden, legendHidden, excludedWhy, priceOf, budget, familyOf, ARCH, color, hollow, paint, rows, symbol, fmtJ, fmt1, fmt0, fmtP, size, users, logTicks, thin, tip, begin, strip };
   })();
 </script>
 
@@ -493,12 +539,45 @@
     dash.setParams({ hide: v });
   };
   try { const v = localStorage.getItem('qx-hide'); if (v) dash.setParams({ hide: v }); } catch (e) { /* no storage */ }
+
+  // budget filter: a slider over the machines' prices ("any price" at the top end) and the two kinds
+  const range = document.getElementById('budget-range'), shown = document.getElementById('budget-value');
+  const kindBox = { system: document.getElementById('kind-system'), card: document.getElementById('kind-card') };
+  const stops = () => [...new Set(QB.ALL().map((s) => QB.priceOf(s).price).filter((p) => p != null))].sort((a, b) => a - b);
+  const setBudget = (p) => {
+    try { localStorage.setItem('qx-budget', JSON.stringify({ budget: p.budget ?? '', kinds: p.kinds })); } catch (e) { /* no storage */ }
+    dash.setParams(p);
+  };
+  try {
+    const v = JSON.parse(localStorage.getItem('qx-budget') || 'null');
+    if (v) dash.setParams({ budget: v.budget === '' ? undefined : v.budget, kinds: v.kinds });
+  } catch (e) { /* no storage */ }
+  range.addEventListener('input', () => {
+    const s = stops(), i = +range.value;
+    setBudget({ budget: i >= s.length ? undefined : s[i], kinds: QB.budget().kinds.join('|') });
+  });
+  for (const [kind, box] of Object.entries(kindBox)) {
+    box.addEventListener('change', () => {
+      const kinds = Object.entries(kindBox).filter(([, b]) => b.checked).map(([k]) => k);
+      setBudget({ budget: QB.budget().max ?? undefined, kinds: kinds.join('|') });
+    });
+  }
+  dash.onData(() => {
+    const s = stops(), b = QB.budget();
+    range.max = String(s.length);                     // one stop per price, plus "any price"
+    const i = b.max == null ? s.length : Math.max(0, s.findIndex((p) => p >= b.max));
+    if (document.activeElement !== range) range.value = String(i);
+    shown.textContent = b.max == null ? 'any price' : `$${d3.format(',')(b.max)}`;
+    range.setAttribute('aria-valuetext', shown.textContent);
+    for (const [kind, box] of Object.entries(kindBox)) box.checked = b.kinds.includes(kind);
+  });
   legend.addEventListener('click', (e) => {
     const b = e.target.closest('button');
-    if (!b) return;
-    const h = QB.hidden();
+    if (!b || b.getAttribute('aria-disabled') === 'true') return;
+    const h = QB.legendHidden();       // only the legend's own toggles; the budget filter is set above the legend
     if (b.classList.contains('qx-reset')) return setHidden(new Set());
-    const group = b.dataset.fam != null ? QB.ALL().filter((s) => (QB.familyOf(s) || 'Other') === b.dataset.fam) : [b.dataset.name];
+    const group = (b.dataset.fam != null ? QB.ALL().filter((s) => (QB.familyOf(s) || 'Other') === b.dataset.fam) : [b.dataset.name])
+      .filter((s) => !QB.excludedWhy(s));
     const show = group.every((s) => h.has(s));      // a family shows when all of it is hidden, otherwise hides
     for (const s of group) show ? h.delete(s) : h.add(s);
     setHidden(h);
@@ -520,19 +599,28 @@
         fb.textContent = name;
         fb.setAttribute('aria-pressed', String(!systems.filter((x) => (QB.familyOf(x) || 'Other') === name).every((x) => h.has(x))));
         fb.title = `Show or hide every ${name} system`;
+        if (systems.filter((x) => (QB.familyOf(x) || 'Other') === name).every((x) => QB.excludedWhy(x))) {
+          fb.setAttribute('aria-disabled', 'true'); fb.classList.add('qx-out'); fb.title = `Every ${name} system is outside the budget`;
+        }
       }
       const b = add(document.createElement('button'));
       b.type = 'button';
       b.dataset.name = s;
       b.setAttribute('aria-pressed', String(!h.has(s)));
+      const why = QB.excludedWhy(s), { price, kind } = QB.priceOf(s);
+      const tag = price != null ? `$${d3.format(',')(price)}${kind === 'card' ? ' card, host not included' : ''}` : 'price unknown';
+      if (why) { b.setAttribute('aria-disabled', 'true'); b.classList.add('qx-out'); b.title = `${s}: ${why}`; }
+      else b.title = `${s}: ${tag}. Click to hide or show.`;
       const i = document.createElement('i');
       i.dataset.sys = s;
       b.append(i, s);
     }
+    const lh = QB.legendHidden(), out = systems.filter((s) => QB.excludedWhy(s)).length;
     const hint = add(document.createElement('span'));
     hint.className = 'qx-legend-hint';
-    hint.textContent = h.size ? `${h.size} hidden from every chart. ` : 'Click a system or family to hide it from every chart.';
-    if (h.size) {
+    hint.textContent = [out ? `${out} outside the budget.` : '', lh.size ? `${lh.size} hidden.` : '',
+      !out && !lh.size ? 'Click a system or family to hide it from every chart.' : ''].filter(Boolean).join(' ') + ' ';
+    if (lh.size) {
       const r = document.createElement('button');
       r.type = 'button';
       r.className = 'qx-reset';

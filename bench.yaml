@@ -3,8 +3,12 @@
 # merged over `machines` below and not committed: start from machines.example.yaml.
 
 machines:
+  # price_usd: US list price (MSRP) for the budget filter, checked 2026-11-21; kind: system (a complete computer) or
+  # card (an add-in card or component; the host isn't included). talos_of machines use their Ubuntu twin's price.
   qb2:
     label: QuietBox 2
+    price_usd: 9999
+    kind: system
     family: Tenstorrent               # systems are grouped by family on the page
     hardware: "Tenstorrent QuietBox 2 (2x p300c, 4x Blackhole)"
     launcher: tt                      # tt serve / tt model stop
@@ -13,6 +17,8 @@ machines:
     port: 8000
   p150:                               # one p150 card in a workstation; models need a p150 build (per_machine.p150)
     label: Tenstorrent p150
+    price_usd: 1399
+    kind: card
     family: Tenstorrent
     hardware: "Tenstorrent p150a (1x Blackhole, 32 GB GDDR6) in a workstation"
     launcher: tt
@@ -21,6 +27,8 @@ machines:
     port: 8000
   n300:                               # one n300 card (2 Wormhole chips) in a workstation; models need an n300 build (per_machine.n300)
     label: Tenstorrent n300
+    price_usd: 1449
+    kind: card
     family: Tenstorrent
     hardware: "Tenstorrent n300d (2x Wormhole, 24 GB GDDR6) in a workstation"
     launcher: tt
@@ -29,6 +37,8 @@ machines:
     port: 8000
   spark:
     label: DGX Spark
+    price_usd: 6950
+    kind: system
     family: NVIDIA
     hardware: "NVIDIA DGX Spark (GB10, 128 GB unified)"
     launcher: vllm-docker             # vllm serve in NVIDIA's container; the client runs in the same container
@@ -70,18 +80,26 @@ machines:
   # Unlike qb2-talos it has no Ubuntu twin, so its results chart on the main page, labeled with the build.
   qb2-k8s:
     label: QuietBox 2
+    price_usd: 9999
+    kind: system
     family: Tenstorrent
     hardware: "Tenstorrent QuietBox 2 (2x p300c, 4x Blackhole), Talos Linux + Kubernetes"
   spark-k8s:                          # the Spark as a node in the same cluster, for models only run there
     label: DGX Spark
+    price_usd: 6950
+    kind: system
     family: NVIDIA
     hardware: "NVIDIA DGX Spark (GB10, 128 GB unified), Talos Linux + Kubernetes"
   spark-pair-k8s:
     label: 2x DGX Spark
+    price_usd: 13900
+    kind: system
     family: NVIDIA
     hardware: "2x NVIDIA DGX Spark (GB10), QSFP 200 Gb/s, tensor parallel 2, Talos Linux + Kubernetes"
   spark-pair:                         # two Sparks as one server over the direct QSFP cable (200 Gb/s)
     label: 2x DGX Spark
+    price_usd: 13900
+    kind: system
     family: NVIDIA
     hardware: "2x NVIDIA DGX Spark (GB10), QSFP 200 Gb/s, tensor parallel 2"
     launcher: vllm-docker
@@ -92,6 +110,8 @@ machines:
     port: 8000
   rtx6000:                            # one Quadro RTX 6000 (Turing, 24 GB) in a workstation; no bf16 on Turing, so models run in fp16
     label: Quadro RTX 6000
+    price_usd: 6300
+    kind: card
     family: NVIDIA
     hardware: "NVIDIA Quadro RTX 6000 (Turing, 24 GB GDDR6) in a workstation"
     launcher: vllm-docker
@@ -121,6 +141,8 @@ machines:
     port: 8000
   framework-desktop-128gb:
     label: Framework Desktop (Ryzen AI Max+ 395)
+    price_usd: 3449
+    kind: system
     family: AMD
     hardware: "Framework Desktop (AMD Ryzen AI Max+ 395, Radeon 8060S, 128 GB unified memory, 96 GiB GTT)"
     launcher: vllm-docker

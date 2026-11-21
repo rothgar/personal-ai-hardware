@@ -668,8 +668,10 @@ def cmd_site(cfg: dict, a: argparse.Namespace) -> int:
         base = models.get(m.get("same_as"), m)               # a second build of a model charts on that model's row
         pm = m["per_machine"].get(mc.get("models_from", r["machine"]), {})
         build = pm.get("build", m.get("build"))              # per-machine build label wins over the model's
+        twin = cfg["machines"].get(mc.get("talos_of"), {})   # a Talos machine costs what its Ubuntu twin does
         out.append({
             "system": mc.get("label", r["machine"]) + (f" ({build})" if build else ""),
+            "price_usd": mc.get("price_usd", twin.get("price_usd", "")), "kind": mc.get("kind", twin.get("kind", "")),
             "family": mc.get("family", ""),
             "model": base["id"], "arch": base["arch"], "weights": pm.get("weights", base.get("weights", "")),
             "total_params_b": base["params_b"]["total"], "active_params_b": base["params_b"]["active"],
