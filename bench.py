@@ -667,8 +667,9 @@ def cmd_site(cfg: dict, a: argparse.Namespace) -> int:
             continue
         base = models.get(m.get("same_as"), m)               # a second build of a model charts on that model's row
         pm = m["per_machine"].get(mc.get("models_from", r["machine"]), {})
+        build = pm.get("build", m.get("build"))              # per-machine build label wins over the model's
         out.append({
-            "system": mc.get("label", r["machine"]) + (f" ({m['build']})" if m.get("build") else ""),
+            "system": mc.get("label", r["machine"]) + (f" ({build})" if build else ""),
             "family": mc.get("family", ""),
             "model": base["id"], "arch": base["arch"], "weights": pm.get("weights", base.get("weights", "")),
             "total_params_b": base["params_b"]["total"], "active_params_b": base["params_b"]["active"],

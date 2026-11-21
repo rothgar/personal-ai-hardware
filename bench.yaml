@@ -72,6 +72,14 @@ machines:
     label: QuietBox 2
     family: Tenstorrent
     hardware: "Tenstorrent QuietBox 2 (2x p300c, 4x Blackhole), Talos Linux + Kubernetes"
+  spark-k8s:                          # the Spark as a node in the same cluster, for models only run there
+    label: DGX Spark
+    family: NVIDIA
+    hardware: "NVIDIA DGX Spark (GB10, 128 GB unified), Talos Linux + Kubernetes"
+  spark-pair-k8s:
+    label: 2x DGX Spark
+    family: NVIDIA
+    hardware: "2x NVIDIA DGX Spark (GB10), QSFP 200 Gb/s, tensor parallel 2, Talos Linux + Kubernetes"
   spark-pair:                         # two Sparks as one server over the direct QSFP cable (200 Gb/s)
     label: 2x DGX Spark
     family: NVIDIA
@@ -128,16 +136,27 @@ machines:
 # per_machine.<machine>.serve is what the launcher serves: a tt catalog name or tt-model bundle, a Hugging Face
 # repo for vLLM, or an MLX repo; weights_gb (Mac) is the MLX download, used to skip models that don't fit.
 models:
+  # Qwen3.8-27B was only benchmarked with every machine as a node in one Talos 1.14.5 + Kubernetes cluster.
   - id: qwen3.8-27b
     hf_id: Qwen/Qwen3.8-27B
-    build: DFlash2 speculative, Talos
     arch: Dense
     params_b: { total: 27.8, active: 27.8 }
-    weights: BFP4/BFP8
+    weights: BF16
     per_machine:
       # moconnor/qwen3.8-27b-QB2 @75f94c6: tt-model v6 thin bundle (TTNN 0.81.1, vLLM 0.30.0), DFlash2 drafter
-      # incoai/Qwen3.8-27B-DFlash2, up to 8 users, prefix caching on. Served as a pod on Talos 1.14.5 + Kubernetes.
-      qb2-k8s: { serve: moconnor/qwen3.8-27b-QB2, source: community }
+      # incoai/Qwen3.8-27B-DFlash2, up to 8 users, prefix caching on.
+      qb2-k8s: { serve: moconnor/qwen3.8-27b-QB2, source: community, build: "DFlash2 speculative, Talos", weights: BFP4/BFP8 }
+      spark-k8s: { serve: Qwen/Qwen3.8-27B, source: vllm, build: Talos }
+      spark-pair-k8s: { serve: Qwen/Qwen3.8-27B, source: vllm, build: Talos }
+
+  - id: qwen3.8-27b-mtp
+    same_as: qwen3.8-27b
+    hf_id: Qwen/Qwen3.8-27B
+    arch: Dense
+    params_b: { total: 27.8, active: 27.8 }
+    weights: BF16
+    per_machine:
+      spark-k8s: { serve: Qwen/Qwen3.8-27B, source: vllm, build: "MTP speculative, Talos" }
 
   - id: qwen3.6-27b
     hf_id: Qwen/Qwen3.6-27B
