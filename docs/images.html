@@ -76,9 +76,44 @@
     }
     return { status: 'missing', data: [] };
   };
+  // System colors: one hue family per manufacturer, so vendors never look alike, and shades within it. Builds of a
+  // system ("DGX Spark (Talos)") take a nearby shade and the main page draws them hollow (dashed lines), so they
+  // differ from their solid base by fill too. Checked in OKLab: >= 20 ΔE (x100) between manufacturers, >= 11
+  // between same-fill systems of one manufacturer; build outlines >= 2.3:1 on white, >= 4.4:1 on the dark panel.
+  // A system not listed gets the next unused shade of its manufacturer.
+  const SYS_HEX = {
+    'QuietBox 2': '#7447d6', 'QuietBox 2 (DFlash2 speculative, Talos)': '#9b7be8',
+    'Tenstorrent p150': '#b0389a', 'Tenstorrent n300': '#e58ad3',
+    'DGX Spark': '#2f8a12', 'DGX Spark (Talos)': '#4c9f2e', 'DGX Spark (MTP speculative, Talos)': '#93b81f',
+    '2x DGX Spark': '#00806f', '2x DGX Spark (Talos)': '#2aa898',
+    'Quadro RTX 6000': '#b9b316',
+    'Framework Desktop (Ryzen AI Max+ 395)': '#e0582e',
+  };
+  const FAMILY_SHADES = {      // spare shades per manufacturer for systems not listed above, in order of use
+    Tenstorrent: ['#5a2fa8', '#cfa8f7', '#8e2a7c'],
+    NVIDIA: ['#1d5e2e', '#c6e08a', '#2a9d8f'],
+    AMD: ['#b8391a', '#f5a07a', '#d97a1a'],
+    Apple: ['#2f6fdf', '#8fb4f2', '#1f4fa3'],
+    '': ['#c98a00', '#e7b94a', '#8a6a10'],
+  };
+  const familyGuess = (s) => (/quietbox|tenstorrent|p1[05]0|n[13]00|blackhole|wormhole/i.test(s) ? 'Tenstorrent'
+    : /spark|rtx|quadro|nvidia|geforce|jetson|dgx/i.test(s) ? 'NVIDIA'
+    : /ryzen|radeon|amd|framework|instinct/i.test(s) ? 'AMD'
+    : /\bmac|apple|\bm[1-9]\b/i.test(s) ? 'Apple' : '');
+  const base = (s) => s.replace(/\s*\([^)]*\)$/, '');
+  const unlisted = {};          // family -> systems given a spare shade, in first-seen order (stable per page)
+  const sysColor = (s, family) => {
+    if (SYS_HEX[s]) return SYS_HEX[s];
+    if (SYS_HEX[base(s)] && /4-chip build/.test(s)) return SYS_HEX[base(s)];   // drawn hollow in its base color
+    const fam = family || familyGuess(s), shades = FAMILY_SHADES[fam] || FAMILY_SHADES[''];
+    const seen = (unlisted[fam] ??= []);
+    if (!seen.includes(s)) seen.push(s);
+    return shades[seen.indexOf(s) % shades.length];
+  };
   let params = { ...PARAMS };
   window.dash = {
     colors,
+    sysColor,
     data,
     calc: (id, spec) => { calcs[id] = spec; },
     loader: () => {},
@@ -261,14 +296,13 @@
   <p><code>tools/video_bench.py</code> sends four fixed prompts (seed 42) one at a time after one uncounted warm-up
   clip, and times each from submitting the job to downloading the finished MP4.</p>
   <p><b>Data and code:</b> <a href="images.csv">images.csv</a>, <a href="videos.csv">videos.csv</a>, and every
-  image and clip in <code>results/*/flux.1-schnell/</code> and <code>results/*/wan2.2-t2v-a14b/</code> at <a href="https://github.com/rothgar/qb2-vs-spark">github.com/rothgar/qb2-vs-spark</a>. Built 2026-11-20.</p>
+  image and clip in <code>results/*/flux.1-schnell/</code> and <code>results/*/wan2.2-t2v-a14b/</code> at <a href="https://github.com/rothgar/qb2-vs-spark">github.com/rothgar/qb2-vs-spark</a>. Built 2026-11-21.</p>
 </footer>
 </div>
 
 <script>
 (() => {
-  const SYS_COLOR = { 'QuietBox 2': 0, 'DGX Spark': 1, '2x DGX Spark': 2 };   // the main page's colors
-  const color = (s) => dash.colors[SYS_COLOR[s] ?? 5];
+  const color = (s) => dash.sysColor(s);   // the main page's colors (manufacturer hue families, shell.html)
   const SLUG = { 'QuietBox 2': 'qb2-talos', 'DGX Spark': 'spark-talos', '2x DGX Spark': 'spark-pair-talos' };
   const VPROMPTS = [
     'a red fox trotting through a snowy pine forest at dawn, photorealistic',

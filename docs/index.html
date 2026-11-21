@@ -76,9 +76,44 @@
     }
     return { status: 'missing', data: [] };
   };
+  // System colors: one hue family per manufacturer, so vendors never look alike, and shades within it. Builds of a
+  // system ("DGX Spark (Talos)") take a nearby shade and the main page draws them hollow (dashed lines), so they
+  // differ from their solid base by fill too. Checked in OKLab: >= 20 ΔE (x100) between manufacturers, >= 11
+  // between same-fill systems of one manufacturer; build outlines >= 2.3:1 on white, >= 4.4:1 on the dark panel.
+  // A system not listed gets the next unused shade of its manufacturer.
+  const SYS_HEX = {
+    'QuietBox 2': '#7447d6', 'QuietBox 2 (DFlash2 speculative, Talos)': '#9b7be8',
+    'Tenstorrent p150': '#b0389a', 'Tenstorrent n300': '#e58ad3',
+    'DGX Spark': '#2f8a12', 'DGX Spark (Talos)': '#4c9f2e', 'DGX Spark (MTP speculative, Talos)': '#93b81f',
+    '2x DGX Spark': '#00806f', '2x DGX Spark (Talos)': '#2aa898',
+    'Quadro RTX 6000': '#b9b316',
+    'Framework Desktop (Ryzen AI Max+ 395)': '#e0582e',
+  };
+  const FAMILY_SHADES = {      // spare shades per manufacturer for systems not listed above, in order of use
+    Tenstorrent: ['#5a2fa8', '#cfa8f7', '#8e2a7c'],
+    NVIDIA: ['#1d5e2e', '#c6e08a', '#2a9d8f'],
+    AMD: ['#b8391a', '#f5a07a', '#d97a1a'],
+    Apple: ['#2f6fdf', '#8fb4f2', '#1f4fa3'],
+    '': ['#c98a00', '#e7b94a', '#8a6a10'],
+  };
+  const familyGuess = (s) => (/quietbox|tenstorrent|p1[05]0|n[13]00|blackhole|wormhole/i.test(s) ? 'Tenstorrent'
+    : /spark|rtx|quadro|nvidia|geforce|jetson|dgx/i.test(s) ? 'NVIDIA'
+    : /ryzen|radeon|amd|framework|instinct/i.test(s) ? 'AMD'
+    : /\bmac|apple|\bm[1-9]\b/i.test(s) ? 'Apple' : '');
+  const base = (s) => s.replace(/\s*\([^)]*\)$/, '');
+  const unlisted = {};          // family -> systems given a spare shade, in first-seen order (stable per page)
+  const sysColor = (s, family) => {
+    if (SYS_HEX[s]) return SYS_HEX[s];
+    if (SYS_HEX[base(s)] && /4-chip build/.test(s)) return SYS_HEX[base(s)];   // drawn hollow in its base color
+    const fam = family || familyGuess(s), shades = FAMILY_SHADES[fam] || FAMILY_SHADES[''];
+    const seen = (unlisted[fam] ??= []);
+    if (!seen.includes(s)) seen.push(s);
+    return shades[seen.indexOf(s) % shades.length];
+  };
   let params = { ...PARAMS };
   window.dash = {
     colors,
+    sysColor,
     data,
     calc: (id, spec) => { calcs[id] = spec; },
     loader: () => {},
@@ -349,7 +384,6 @@
   window.QB = (() => {
     // systems in a fixed order and color; any other system in the data (a contributed Mac, say) follows them
     const KNOWN = ['QuietBox 2', 'QuietBox 2 (4-chip build)', 'Tenstorrent p150', 'Tenstorrent n300', 'DGX Spark', '2x DGX Spark', 'Quadro RTX 6000'];
-    const SYS_COLOR = { 'QuietBox 2': 0, 'QuietBox 2 (4-chip build)': 0, 'DGX Spark': 1, '2x DGX Spark': 2, 'Tenstorrent p150': 3, 'Tenstorrent n300': 4, 'Quadro RTX 6000': 5 };
     // grouped by vendor family (Tenstorrent, NVIDIA, Apple, then any other), known systems first within a family
     const FAMILIES = ['Tenstorrent', 'NVIDIA', 'Apple'];
     const familyOf = (s) => {
@@ -361,20 +395,32 @@
       const d = dash.data('results');
       // only systems with something to chart: wall power, or a test other than the power test
       const seen = d.status === 'ok' ? [...new Set(d.data.filter((r) => r.tok_per_j !== '' || r.workload !== 'power').map((r) => r.system))] : [];
+      // builds sit right after their base system ("DGX Spark", then "DGX Spark (Talos)", ...)
+      const base = (s) => (seen.includes(s.replace(/\s*\([^)]*\)$/, '')) ? s.replace(/\s*\([^)]*\)$/, '') : s);
       return seen.sort((a, b) => rank(FAMILIES, familyOf(a)) - rank(FAMILIES, familyOf(b))
-        || rank(KNOWN, a) - rank(KNOWN, b) || a.localeCompare(b));
+        || rank(KNOWN, base(a)) - rank(KNOWN, base(b)) || base(a).localeCompare(base(b))
+        || (a !== base(a)) - (b !== base(b)) || rank(KNOWN, a) - rank(KNOWN, b) || a.localeCompare(b));
     };
     // systems hidden with the legend's toggles (the `hide` param, '|'-separated); every chart reads SYS() and rows()
     const hidden = () => new Set((dash.params().hide || '').split('|').filter(Boolean));
     const SYS = () => { const h = hidden(); return ALL().filter((s) => !h.has(s)); };
-    const hollow = (s) => s === 'QuietBox 2 (4-chip build)';   // same color as QuietBox 2, drawn as an outline
+    // a build of a system ("DGX Spark (MTP speculative, Talos)", "QuietBox 2 (4-chip build)") is drawn as an outline
+    // (dashed in line charts) in its own shade, so it reads apart from the solid base system by fill, not just shade
+    // (not every parenthesis: "Framework Desktop (Ryzen AI Max+ 395)" is a system, so the base must be one too)
+    const hollow = (s) => { const b = s.replace(/\s*\([^)]*\)$/, ''); return b !== s && ALL().includes(b); };
     // fill, outline and outline width for a system's marks
     const paint = (sel, sys) => sel
       .attr('fill', (d) => (hollow(sys(d)) ? 'var(--color-panel)' : color(sys(d))))
       .attr('stroke', (d) => (hollow(sys(d)) ? color(sys(d)) : 'var(--color-panel)'))
       .attr('stroke-width', (d) => (hollow(sys(d)) ? 2.5 : 1.5));
     const ARCH = ['Dense', 'MoE', 'Hybrid MoE'];
-    const color = (s) => dash.colors[SYS_COLOR[s] ?? (6 + Math.max(0, ALL().filter((x) => !KNOWN.includes(x)).indexOf(s))) % dash.colors.length];
+    // manufacturer hue families (shell.html), with the family from the data. Every system is colored once, in the
+    // legend's order, before any chart asks, so a spare shade follows the system and not whatever is hidden.
+    let seeded = false;
+    const color = (s) => {
+      if (!seeded && dash.data('results').status === 'ok') { seeded = true; ALL().forEach((x) => dash.sysColor(x, familyOf(x))); }
+      return dash.sysColor(s, familyOf(s));
+    };
     const num = (v) => (v === '' || v == null ? null : +v);
     const rows = () => {
       const d = dash.data('results');
@@ -1342,7 +1388,7 @@
   <ul><li><a href="https://artificialanalysis.ai/models/qwen3-6-27b">qwen3.6-27b</a>: 21 (Reasoning)</li><li><a href="https://artificialanalysis.ai/models/qwen3-coder-30b-a3b-instruct">qwen3-coder-30b-a3b</a>: 10 (Non-reasoning, estimate)</li><li><a href="https://artificialanalysis.ai/models/devstral-small-2">devstral-small-2-24b</a>: 8 (Non-reasoning)</li><li><a href="https://artificialanalysis.ai/models/gemma-4-31b">gemma-4-31b</a>: 15 (Reasoning)</li><li><a href="https://artificialanalysis.ai/models/muse-glimmer">muse-glimmer-30b</a>: 17 (High (reasoning))</li><li><a href="https://artificialanalysis.ai/models/nemotron-3-5-lightning">nemotron-3.5-lightning-30b-a3b</a>: 13 (Reasoning (BF16 weights))</li><li><a href="https://artificialanalysis.ai/models/qwen3-6-35b-a3b">qwen3.6-35b-a3b</a>: 18 (Reasoning)</li><li><a href="https://artificialanalysis.ai/models/gpt-oss-20b">gpt-oss-20b</a>: 9 (High)</li><li><a href="https://artificialanalysis.ai/models/gpt-oss-120b">gpt-oss-120b</a>: 12 (High)</li><li><a href="https://artificialanalysis.ai/models/qwen3-5-122b-a10b">qwen3.5-122b-a10b</a>: 16 (Reasoning)</li><li><a href="https://artificialanalysis.ai/models/llama-3-3-instruct-70b">llama-3.3-70b</a>: 8 (Non-reasoning, estimate)</li><li><a href="https://artificialanalysis.ai/models/deepseek-v4-1-flash">deepseek-v4.1-flash</a>: 39 (Max (reasoning))</li></ul>
   <p><b>Data and code:</b> <a href="results.csv">results.csv</a>, <a href="quality.csv">quality.csv</a>, and the
   benchmark harness at <a href="https://github.com/rothgar/qb2-vs-spark">github.com/rothgar/qb2-vs-spark</a>, where
-  you can add results from your own machine. Built 2026-11-20.</p>
+  you can add results from your own machine. Built 2026-11-21.</p>
 </footer>
 
 </div>

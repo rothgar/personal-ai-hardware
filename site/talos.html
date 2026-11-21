@@ -159,8 +159,7 @@
 
 <script>
   const SYSTEMS = ['DGX Spark', '2x DGX Spark', 'QuietBox 2'];
-  const SYS_COLOR = { 'QuietBox 2': 0, 'DGX Spark': 1, '2x DGX Spark': 2 };   // the main page's colors
-  const color = (s) => dash.colors[SYS_COLOR[s] ?? 5];
+  const color = (s) => dash.sysColor(s);   // the main page's colors (manufacturer hue families, shell.html)
   const METRICS = {
     tok: { label: 'Throughput', key: 'tok_s', better: 1, title: 'Total output tokens per second',
            fmt: (v) => `${d3.format(',.1f')(v)} tok/s` },

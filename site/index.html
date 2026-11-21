@@ -249,7 +249,6 @@
   window.QB = (() => {
     // systems in a fixed order and color; any other system in the data (a contributed Mac, say) follows them
     const KNOWN = ['QuietBox 2', 'QuietBox 2 (4-chip build)', 'Tenstorrent p150', 'Tenstorrent n300', 'DGX Spark', '2x DGX Spark', 'Quadro RTX 6000'];
-    const SYS_COLOR = { 'QuietBox 2': 0, 'QuietBox 2 (4-chip build)': 0, 'DGX Spark': 1, '2x DGX Spark': 2, 'Tenstorrent p150': 3, 'Tenstorrent n300': 4, 'Quadro RTX 6000': 5 };
     // grouped by vendor family (Tenstorrent, NVIDIA, Apple, then any other), known systems first within a family
     const FAMILIES = ['Tenstorrent', 'NVIDIA', 'Apple'];
     const familyOf = (s) => {
@@ -261,20 +260,32 @@
       const d = dash.data('results');
       // only systems with something to chart: wall power, or a test other than the power test
       const seen = d.status === 'ok' ? [...new Set(d.data.filter((r) => r.tok_per_j !== '' || r.workload !== 'power').map((r) => r.system))] : [];
+      // builds sit right after their base system ("DGX Spark", then "DGX Spark (Talos)", ...)
+      const base = (s) => (seen.includes(s.replace(/\s*\([^)]*\)$/, '')) ? s.replace(/\s*\([^)]*\)$/, '') : s);
       return seen.sort((a, b) => rank(FAMILIES, familyOf(a)) - rank(FAMILIES, familyOf(b))
-        || rank(KNOWN, a) - rank(KNOWN, b) || a.localeCompare(b));
+        || rank(KNOWN, base(a)) - rank(KNOWN, base(b)) || base(a).localeCompare(base(b))
+        || (a !== base(a)) - (b !== base(b)) || rank(KNOWN, a) - rank(KNOWN, b) || a.localeCompare(b));
     };
     // systems hidden with the legend's toggles (the `hide` param, '|'-separated); every chart reads SYS() and rows()
     const hidden = () => new Set((dash.params().hide || '').split('|').filter(Boolean));
     const SYS = () => { const h = hidden(); return ALL().filter((s) => !h.has(s)); };
-    const hollow = (s) => s === 'QuietBox 2 (4-chip build)';   // same color as QuietBox 2, drawn as an outline
+    // a build of a system ("DGX Spark (MTP speculative, Talos)", "QuietBox 2 (4-chip build)") is drawn as an outline
+    // (dashed in line charts) in its own shade, so it reads apart from the solid base system by fill, not just shade
+    // (not every parenthesis: "Framework Desktop (Ryzen AI Max+ 395)" is a system, so the base must be one too)
+    const hollow = (s) => { const b = s.replace(/\s*\([^)]*\)$/, ''); return b !== s && ALL().includes(b); };
     // fill, outline and outline width for a system's marks
     const paint = (sel, sys) => sel
       .attr('fill', (d) => (hollow(sys(d)) ? 'var(--color-panel)' : color(sys(d))))
       .attr('stroke', (d) => (hollow(sys(d)) ? color(sys(d)) : 'var(--color-panel)'))
       .attr('stroke-width', (d) => (hollow(sys(d)) ? 2.5 : 1.5));
     const ARCH = ['Dense', 'MoE', 'Hybrid MoE'];
-    const color = (s) => dash.colors[SYS_COLOR[s] ?? (6 + Math.max(0, ALL().filter((x) => !KNOWN.includes(x)).indexOf(s))) % dash.colors.length];
+    // manufacturer hue families (shell.html), with the family from the data. Every system is colored once, in the
+    // legend's order, before any chart asks, so a spare shade follows the system and not whatever is hidden.
+    let seeded = false;
+    const color = (s) => {
+      if (!seeded && dash.data('results').status === 'ok') { seeded = true; ALL().forEach((x) => dash.sysColor(x, familyOf(x))); }
+      return dash.sysColor(s, familyOf(s));
+    };
     const num = (v) => (v === '' || v == null ? null : +v);
     const rows = () => {
       const d = dash.data('results');

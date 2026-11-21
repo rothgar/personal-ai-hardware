@@ -167,8 +167,7 @@
 </div>
 
 <script>
-  const SYS_COLOR = { 'QuietBox 2': 0, 'DGX Spark': 1, '2x DGX Spark': 2 };   // the main page's colors
-  const color = (s) => dash.colors[SYS_COLOR[s] ?? 5];
+  const color = (s) => dash.sysColor(s);   // the main page's colors (manufacturer hue families, shell.html)
   const SLUG = { 'QuietBox 2': 'qb2-talos', 'DGX Spark': 'spark-talos', '2x DGX Spark': 'spark-pair-talos' };
   const VPROMPTS = [
     'a red fox trotting through a snowy pine forest at dawn, photorealistic',
