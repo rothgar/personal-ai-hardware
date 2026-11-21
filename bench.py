@@ -696,8 +696,8 @@ def cmd_site(cfg: dict, a: argparse.Namespace) -> int:
     systems = ", ".join(sorted({o["system"] for o in out}))
     page = page.replace("__QUALITY__", aa).replace("__SYSTEMS__", html.escape(systems))
     write_page("index.html", page, {"results": out, "aa_index": quality}, "Best Personal AI Hardware",
-               "Power efficiency and speed of open-weight models on Tenstorrent, NVIDIA, Apple and AMD hardware, "
-               "measured at the wall, with running cost and published quality scores.")
+               "Power efficiency and speed of open-weight models on personal AI hardware, measured at the wall, "
+               "with running cost and published quality scores.")
     (DOCS / ".nojekyll").touch()
     print(f"wrote {DOCS / 'index.html'} ({len(out)} result rows, {len(quality)} quality scores)")
 

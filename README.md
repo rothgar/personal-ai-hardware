@@ -1,6 +1,6 @@
 # QuietBox 2 vs DGX Spark
 
-Speed, wall-power efficiency and running cost for open-weight models on Tenstorrent, NVIDIA and Apple hardware:
+Speed, wall-power efficiency and running cost for open-weight models on personal AI hardware:
 a Tenstorrent QuietBox 2, one and two NVIDIA DGX Sparks, and any machine you add.
 
 **Results:** https://rothgar.github.io/qb2-vs-spark/
