@@ -653,6 +653,7 @@ def cmd_report(cfg: dict, a: argparse.Namespace) -> int:
 
 # ---------------------------------------------------------------------------------------------------- site
 
+SITE_URL = "https://rothgar.github.io/qb2-vs-spark/"   # where docs/ is published (GitHub Pages)
 SITE_RESULTS, SITE_QUALITY, SITE_TALOS, SITE_IMAGES, SITE_VIDEOS = "results.csv", "quality.csv", "talos.csv", "images.csv", "videos.csv"
 
 
@@ -811,8 +812,10 @@ def write_page(name: str, page: str, data: dict[str, list[dict]], title: str, de
     # each dashboard script runs in its own scope
     page = re.sub(r"<script>(.*?)</script>", lambda x: f"<script>\n(() => {{{x.group(1)}}})();\n</script>", page, flags=re.S)
     data = {k: [{c: ("" if v is None else str(v)) for c, v in o.items()} for o in rows] for k, rows in data.items()}
+    url = SITE_URL + ("" if name == "index.html" else name)
     doc = ((ROOT / "site" / "shell.html").read_text()
            .replace("__TITLE__", html.escape(title)).replace("__DESC__", html.escape(desc))
+           .replace("__URL__", url).replace("__SITE__", SITE_URL)      # sharing metadata; docs/og.png is tools/make-og.sh
            .replace("__DATA__", json.dumps(data, separators=(",", ":"))).replace("__PAGE__", page)
            .replace("__DATE__", f"{dt.date.today():%Y-%m-%d}"))
     (DOCS / name).write_text(doc)
