@@ -77,7 +77,11 @@
   .qx .qx-legend .qx-fam { font-weight: var(--cds-font-weight-medium); background: transparent; border-color: transparent;
     padding-inline: 0.35rem; margin-left: var(--cds-gap-md); }
   .qx .qx-legend .qx-fam:hover { border-color: var(--color-border-line); }
-  .qx .qx-legend .qx-fam { margin-left: 0; min-width: 7.5rem; justify-content: flex-start; }
+  .qx .qx-legend .qx-fam { margin-left: 0; padding: 0.1rem 0.35rem; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--color-fg-muted); }
+  .qx .qx-legend .qx-fam:not(:first-child) { margin-top: 0.4rem; }
+  .qx-legend .qx-break + .qx-fam { margin-top: 0.4rem; }
+  .qx-legend .qx-break:has(+ .qx-fam) { border-top: 1px solid var(--color-border-line); margin-top: 0.35rem; }
   .qx-legend .qx-break { flex-basis: 100%; height: 0; }
   .qx .qx-legend .qx-fam[aria-pressed="false"] { border-style: solid; border-color: transparent; }
   .qx .qx-legend .qx-reset { text-decoration: underline; background: transparent; border: 0; padding: 0; color: var(--color-fg); }
@@ -395,8 +399,8 @@
   window.QB = (() => {
     // systems in a fixed order and color; any other system in the data (a contributed Mac, say) follows them
     const KNOWN = ['QuietBox 2', 'QuietBox 2 (4-chip build)', 'Tenstorrent p150', 'Tenstorrent n300', 'DGX Spark', '2x DGX Spark', 'Quadro RTX 6000'];
-    // grouped by vendor family (Tenstorrent, NVIDIA, Apple, then any other), known systems first within a family
-    const FAMILIES = ['Tenstorrent', 'NVIDIA', 'Apple'];
+    // grouped by vendor family (NVIDIA, Tenstorrent, Apple, AMD, then any other), known systems first within a family
+    const FAMILIES = ['NVIDIA', 'Tenstorrent', 'Apple', 'AMD'];
     const familyOf = (s) => {
       const d = dash.data('results');
       return (d.status === 'ok' && d.data.find((r) => r.system === s)?.family) || '';
@@ -573,7 +577,7 @@
       const runs = results.filter((r) => r.workload === 'power' && r.users === users && r.tok_per_j !== '')
         .sort((a, b) => b.tok_per_j - a.tok_per_j);
       if (!runs.length) return { users };
-      const order = ['Tenstorrent', 'NVIDIA', 'Apple', 'AMD'], at = (f) => (order.includes(f) ? order.indexOf(f) : order.length);
+      const order = ['NVIDIA', 'Tenstorrent', 'Apple', 'AMD'], at = (f) => (order.includes(f) ? order.indexOf(f) : order.length);
       const fams = [...new Set(runs.map((r) => r.family).filter(Boolean))].sort((a, b) => at(a) - at(b));
       const best = runs[0], worst = runs[runs.length - 1];
       return {
@@ -723,7 +727,7 @@
       if (grouped && QB.familyOf(s) !== fam) {
         fam = QB.familyOf(s);
         const name = fam || 'Other';
-        if (fam !== QB.familyOf(systems[0])) add(document.createElement('span')).className = 'qx-break';   // each family on its own line
+        if (fam !== QB.familyOf(systems[0])) add(document.createElement('span')).className = 'qx-break';
         const fb = add(document.createElement('button'));
         fb.type = 'button';
         fb.className = 'qx-fam';
@@ -734,6 +738,7 @@
         if (systems.filter((x) => (QB.familyOf(x) || 'Other') === name).every((x) => QB.excludedWhy(x))) {
           fb.setAttribute('aria-disabled', 'true'); fb.classList.add('qx-out'); fb.title = `Every ${name} system is outside the budget`;
         }
+        add(document.createElement('span')).className = 'qx-break';   // the vendor's name on its own line, its systems below
       }
       const b = add(document.createElement('button'));
       b.type = 'button';
